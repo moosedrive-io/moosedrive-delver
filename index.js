@@ -3,6 +3,7 @@ const { RemoBuilder } = require('remofs');
 const Koa = require('koa');
 const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
+const koaStatic = require('koa-static');
 
 const app = new Koa();
 const router = new Router();
@@ -25,7 +26,17 @@ router.get('/fs/*', async ctx => {
   ctx.body = JSON.stringify(result);
 });
 
+router.post('/login', async ctx => {
+  console.log(ctx.request.body);
+  const token = await auth.createAndSendToken(ctx.request.body);
+  console.log(token);
+  ctx.body = JSON.stringify({
+    token,
+  });
+});
+
 app
+  .use(koaStatic('client'))
   .use(bodyParser({
     enableTypes: ['json'],
   }))
