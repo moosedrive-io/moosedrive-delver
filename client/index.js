@@ -21,7 +21,7 @@ const Home = {
 
   view: function() {
     if (!State.fs) {
-      return "Hi there";
+      return null;
     }
 
     return m('main',
@@ -30,13 +30,25 @@ const Home = {
         m('.center-panel.pure-u-1-2',
           State.fs.map((item) => {
             return m('.pure-g',
-              m('.pure-u-1', item.name),
+              m('.pure-u-1',
+                m(Item, { item })
+              ),
             );
           }),
         ),
         m('.right-panel.pure-u-1-4'),
       ),
     );
+  }
+};
+
+const Item = () => {
+  return {
+    view: (vnode) => m('.item',
+      m('.item__name',
+        vnode.attrs.item.name,
+      )
+    ),
   }
 };
 
