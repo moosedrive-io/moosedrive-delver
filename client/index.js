@@ -1,18 +1,24 @@
 const State = {
   token: null,
   fs: null,
+  remoAddr: 'http://localhost:9001',
 };
 
 const Home = {
   oninit: function() {
     State.token = localStorage.getItem('token');
 
+    console.log(State);
+
     if (State.token === null) {
       m.route.set('/login');
     }
 
     m.request({
-      url: '/fs/dir1?key=' + State.token,
+      url: State.remoAddr + '/dir1',
+      headers: {
+        'Authorization': 'Bearer ' + State.token,
+      },
     })
     .then(function(res) {
       State.fs = res;
