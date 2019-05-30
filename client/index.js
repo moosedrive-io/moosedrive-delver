@@ -28,18 +28,37 @@ const Home = {
       m('.pure-g',
         m('.left-panel.pure-u-1-4'),
         m('.center-panel.pure-u-1-2',
-          State.fs.map((item) => {
-            return m('.pure-g',
-              m('.pure-u-1',
-                m(Item, { item })
-              ),
-            );
-          }),
+          m(BreadcrumbPath, { pathList: ['dir1', 'dir2', 'dir3'] }),
+          m(Directory, { items: State.fs }),
         ),
         m('.right-panel.pure-u-1-4'),
       ),
     );
   }
+};
+
+const BreadcrumbPath = () => {
+  return {
+    view: (vnode) => m('.breadcrumb-path.pure-g',
+      vnode.attrs.pathList.map((elem) => {
+        return m('span.pure-u-1-3', "Braecrumbs");
+      }),
+    ),
+  };
+};
+
+const Directory = () => {
+  return {
+    view: (vnode) => m('.directory',
+      vnode.attrs.items.map((item) => {
+        return m('.pure-g',
+          m('.pure-u-1',
+            m(Item, { item })
+          ),
+        );
+      })
+    ),
+  };
 };
 
 const Item = () => {
