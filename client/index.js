@@ -1,6 +1,8 @@
 const State = {
   token: null,
   fs: null,
+  curDir: null,
+  curPath: null,
   remoAddr: 'http://localhost:9001',
 };
 
@@ -15,18 +17,21 @@ const Home = {
     }
 
     m.request({
-      url: State.remoAddr + '/dir1',
+      url: State.remoAddr + '/',
       headers: {
         'Authorization': 'Bearer ' + State.token,
       },
     })
     .then(function(res) {
+      console.log(res);
       State.fs = res;
+      State.curDir = res;
+      State.curPath = [];
     });
   },
 
   view: function() {
-    if (!State.fs) {
+    if (!State.curDir) {
       return null;
     }
 
@@ -35,7 +40,25 @@ const Home = {
         m('.left-panel.pure-u-1-4'),
         m('.center-panel.pure-u-1-2',
           m(BreadcrumbPath, { pathList: ['dir1', 'dir2', 'dir3'] }),
-          m(Directory, { items: State.fs }),
+          m(Directory, {
+            items: State.curDir.children,
+            clicked: (key) => {
+              console.log(key);
+
+              State.curPath.push(key);
+              console.log(State.remoAddr + '/' + State.curPath.join('/'));
+              m.request({
+                url: State.remoAddr + '/' + State.curPath.join('/'),
+                headers: {
+                  'Authorization': 'Bearer ' + State.token,
+                },
+              })
+              .then(function(res) {
+                console.log(res);
+                State.curDir = res;
+              });
+            },
+          }),
         ),
         m('.right-panel.pure-u-1-4'),
       ),
@@ -46,9 +69,9 @@ const Home = {
 const BreadcrumbPath = () => {
   return {
     view: (vnode) => m('.breadcrumb-path.pure-g',
-      vnode.attrs.pathList.map((elem) => {
-        return m('span.pure-u-1-3', "Braecrumbs");
-      }),
+      //vnode.attrs.pathList.map((elem) => {
+      //  return m('span.pure-u-1-3', "Braecrumbs");
+      //}),
     ),
   };
 };
@@ -56,10 +79,17 @@ const BreadcrumbPath = () => {
 const Directory = () => {
   return {
     view: (vnode) => m('.directory',
-      vnode.attrs.items.map((item) => {
+      Object.keys(vnode.attrs.items).map((key) => {
         return m('.pure-g',
-          m('.pure-u-1',
-            m(Item, { item })
+          m('.pure-u-1', {
+              onclick: () => {
+                vnode.attrs.clicked(key);
+              },
+            },
+            m(Item, {
+              name: key,
+              data: vnode.attrs.items[key],
+            }),
           ),
         );
       })
@@ -71,7 +101,7 @@ const Item = () => {
   return {
     view: (vnode) => m('.item',
       m('.item__name',
-        vnode.attrs.item.name,
+        vnode.attrs.name,
       )
     ),
   }
