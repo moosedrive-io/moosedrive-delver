@@ -17,7 +17,7 @@ const Home = {
     }
 
     m.request({
-      url: State.remoAddr + '/',
+      url: State.remoAddr + '/' + '?fullTree',
       headers: {
         'Authorization': 'Bearer ' + State.token,
       },
@@ -43,20 +43,8 @@ const Home = {
           m(Directory, {
             items: State.curDir.children,
             clicked: (key) => {
-              console.log(key);
-
               State.curPath.push(key);
-              console.log(State.remoAddr + '/' + State.curPath.join('/'));
-              m.request({
-                url: State.remoAddr + '/' + State.curPath.join('/'),
-                headers: {
-                  'Authorization': 'Bearer ' + State.token,
-                },
-              })
-              .then(function(res) {
-                console.log(res);
-                State.curDir = res;
-              });
+              State.curDir = State.curDir.children[key];
             },
           }),
         ),
