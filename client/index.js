@@ -39,12 +39,22 @@ const Home = {
       m('.pure-g',
         m('.left-panel.pure-u-1-4'),
         m('.center-panel.pure-u-1-2',
-          m(BreadcrumbPath, { pathList: ['dir1', 'dir2', 'dir3'] }),
+          m(BreadcrumbPath, { pathList: State.curPath }),
           m(Directory, {
             items: State.curDir.children,
             clicked: (key) => {
-              State.curPath.push(key);
-              State.curDir = State.curDir.children[key];
+              if (key === '..') {
+                State.curPath.pop();
+                State.curDir = State.fs;
+
+                for (const part of State.curPath) {
+                  State.curDir = State.curDir.children[part];
+                }
+              }
+              else {
+                State.curPath.push(key);
+                State.curDir = State.curDir.children[key];
+              }
             },
           }),
         ),
@@ -57,9 +67,10 @@ const Home = {
 const BreadcrumbPath = () => {
   return {
     view: (vnode) => m('.breadcrumb-path.pure-g',
-      //vnode.attrs.pathList.map((elem) => {
-      //  return m('span.pure-u-1-3', "Braecrumbs");
-      //}),
+      m('span.pure-u', '/'),
+      vnode.attrs.pathList.map((elem) => {
+        return m('span.pure-u', elem + '/');
+      }),
     ),
   };
 };
@@ -67,6 +78,16 @@ const BreadcrumbPath = () => {
 const Directory = () => {
   return {
     view: (vnode) => m('.directory',
+      m('.pure-u-1', {
+          onclick: () => {
+            vnode.attrs.clicked('..');
+          },
+        },
+        m(Item, {
+          name: '..',
+          data: {},
+        }),
+      ),
       Object.keys(vnode.attrs.items).map((key) => {
         return m('.pure-g',
           m('.pure-u-1', {
