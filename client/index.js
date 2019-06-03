@@ -130,9 +130,9 @@ const Item = () => {
       const url = encodeURI(State.remoAddr + '/' + path);
 
       if (type === 'file') {
-				return m('.item',
-				  m('a.file', { href: url, target: '_blank' },
-					  name
+				return m('a.file', { href: url, target: '_blank' },
+				  m('.item',
+						m('.item__name', name)
 					),
 				);
 			}
