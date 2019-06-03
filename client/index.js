@@ -59,23 +59,23 @@ const Home = {
                   State.curDir = State.curDir.children[key];
                 }
                 else if (target.type === 'file') {
-                  const path = State.curPath.concat([key]).join('/');
-                  console.log("FILE", path);
-                  const url = encodeURI(State.remoAddr + '/' + path);
-                  console.log(url);
-                  m.request({
-                    url,
-                    headers: {
-                      'Authorization': 'Bearer ' + State.token,
-                    },
-                    deserialize: function(value) {return value},
-                  })
-                  .then((contents) => {
-                    console.log(contents);
-                  })
-                  .catch((e) => {
-                    console.error(e);
-                  });
+                  //const path = State.curPath.concat([key]).join('/');
+                  //console.log("FILE", path);
+                  //const url = encodeURI(State.remoAddr + '/' + path);
+                  //console.log(url);
+                  //m.request({
+                  //  url,
+                  //  headers: {
+                  //    'Authorization': 'Bearer ' + State.token,
+                  //  },
+                  //  deserialize: function(value) {return value},
+                  //})
+                  //.then((contents) => {
+                  //  console.log(contents);
+                  //})
+                  //.catch((e) => {
+                  //  console.error(e);
+                  //});
                 }
               }
             },
@@ -131,12 +131,26 @@ const Directory = () => {
 
 const Item = () => {
   return {
-    view: (vnode) => m('.item',
-      m('.item__name',
-        vnode.attrs.name,
-      )
-    ),
-  }
+    view: (vnode) => {
+		  const name = vnode.attrs.name;
+			const type = vnode.attrs.data.type;
+      const path = State.curPath.concat([name]).join('/');
+      const url = encodeURI(State.remoAddr + '/' + path);
+
+      if (type === 'file') {
+				return m('.item',
+				  m('a.file', { href: url, target: '_blank' },
+					  name
+					),
+				);
+			}
+			else {
+				return m('.item',
+					m('.item__name', name)
+				);
+			}
+		},
+	};
 };
 
 function Login() {
