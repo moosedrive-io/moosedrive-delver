@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
 
     <style>
+
+      :root {
+				--text-color: #000000;
+			}
+
       .center-panel {
       }
 
@@ -16,8 +21,13 @@
       }
 
       .file {
+				color: var(--text-color);
 				text-decoration: none;
       }
+
+		  .file:visited {
+				color: var(--text-color);
+		  }
 
       .item {
         border-bottom: 2px solid LightGray;
