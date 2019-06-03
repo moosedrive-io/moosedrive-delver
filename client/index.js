@@ -52,8 +52,31 @@ const Home = {
                 }
               }
               else {
-                State.curPath.push(key);
-                State.curDir = State.curDir.children[key];
+                console.log(State.curDir);
+                const target = State.curDir.children[key];
+                if (target.type === 'dir') {
+                  State.curPath.push(key);
+                  State.curDir = State.curDir.children[key];
+                }
+                else if (target.type === 'file') {
+                  const path = State.curPath.concat([key]).join('/');
+                  console.log("FILE", path);
+                  const url = encodeURI(State.remoAddr + '/' + path);
+                  console.log(url);
+                  m.request({
+                    url,
+                    headers: {
+                      'Authorization': 'Bearer ' + State.token,
+                    },
+                    deserialize: function(value) {return value},
+                  })
+                  .then((contents) => {
+                    console.log(contents);
+                  })
+                  .catch((e) => {
+                    console.error(e);
+                  });
+                }
               }
             },
           }),
