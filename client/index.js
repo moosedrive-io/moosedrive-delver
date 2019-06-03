@@ -1,5 +1,4 @@
 const State = {
-  token: null,
   fs: null,
   curDir: null,
   curPath: null,
@@ -8,19 +7,12 @@ const State = {
 
 const Home = {
   oninit: function() {
-    State.token = localStorage.getItem('token');
 
     console.log(State);
 
-    if (State.token === null) {
-      m.route.set('/login');
-    }
-
     m.request({
       url: State.remoAddr + '/' + '?fullTree',
-      headers: {
-        'Authorization': 'Bearer ' + State.token,
-      },
+			withCredentials: true,
     })
     .then(function(res) {
       console.log(res);
@@ -175,14 +167,15 @@ function Login() {
               console.log(email);
 
               m.request({
-                url: '/login',
+                url: State.remoAddr + '/login',
                 method: 'POST',
+								withCredentials: true,
                 data: {
                   email,
                 },
               })
               .then(function(response) {
-                localStorage.setItem('token', response.token);
+								console.log(response);
                 m.route.set('/home');
               });
             },
