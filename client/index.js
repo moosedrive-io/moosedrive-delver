@@ -132,13 +132,15 @@ const Item = () => {
       if (type === 'file') {
 				return m('a.file', { href: url, target: '_blank' },
 				  m('.item',
-						m('.item__name', name)
+            m('i.far.fa-file'),
+						m('span.item__name', name),
 					),
 				);
 			}
 			else {
 				return m('.item',
-					m('.item__name', name)
+          m('i.fas.fa-folder'),
+					m('span.item__name', name)
 				);
 			}
 		},
