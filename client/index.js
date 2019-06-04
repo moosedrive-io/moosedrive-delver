@@ -11,7 +11,7 @@ const Home = {
     console.log(State);
 
     m.request({
-      url: State.remoAddr + '/' + '?fullTree',
+      url: State.remoAddr + '/',
 			withCredentials: true,
     })
     .then(function(res) {
@@ -49,25 +49,6 @@ const Home = {
                 if (target.type === 'dir') {
                   State.curPath.push(key);
                   State.curDir = State.curDir.children[key];
-                }
-                else if (target.type === 'file') {
-                  //const path = State.curPath.concat([key]).join('/');
-                  //console.log("FILE", path);
-                  //const url = encodeURI(State.remoAddr + '/' + path);
-                  //console.log(url);
-                  //m.request({
-                  //  url,
-                  //  headers: {
-                  //    'Authorization': 'Bearer ' + State.token,
-                  //  },
-                  //  deserialize: function(value) {return value},
-                  //})
-                  //.then((contents) => {
-                  //  console.log(contents);
-                  //})
-                  //.catch((e) => {
-                  //  console.error(e);
-                  //});
                 }
               }
             },
@@ -132,7 +113,7 @@ const Item = () => {
       if (type === 'file') {
 				return m('a.file', { href: url, target: '_blank' },
 				  m('.item',
-            m('i.far.fa-file'),
+            m('i.fas.fa-file'),
 						m('span.item__name', name),
 					),
 				);
