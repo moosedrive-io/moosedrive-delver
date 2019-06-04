@@ -31,25 +31,34 @@ const Home = {
       m('.pure-g',
         m('.left-panel.pure-u-1-4'),
         m('.center-panel.pure-u-1-2',
-          m(BreadcrumbPath, { pathList: State.curPath }),
+          m(DirNav, {
+						pathList: State.curPath,
+						onUp: () => {
+							State.curPath.pop();
+              State.curDir = State.fs;
+
+              for (const part of State.curPath) {
+                State.curDir = State.curDir.children[part];
+              }
+						},
+						onBack: () => {
+							console.log("back");
+						},
+						onForward: () => {
+							console.log("forward");
+						},
+						onUpload: () => {
+							console.log("upload");
+						},
+					}),
           m(Directory, {
             items: State.curDir.children,
             clicked: (key) => {
-              if (key === '..') {
-                State.curPath.pop();
-                State.curDir = State.fs;
-
-                for (const part of State.curPath) {
-                  State.curDir = State.curDir.children[part];
-                }
-              }
-              else {
-                console.log(State.curDir);
-                const target = State.curDir.children[key];
-                if (target.type === 'dir') {
-                  State.curPath.push(key);
-                  State.curDir = State.curDir.children[key];
-                }
+              console.log(State.curDir);
+              const target = State.curDir.children[key];
+              if (target.type === 'dir') {
+                State.curPath.push(key);
+                State.curDir = State.curDir.children[key];
               }
             },
           }),
@@ -60,9 +69,50 @@ const Home = {
   }
 };
 
+const DirNav = () => {
+	return {
+		view: (vnode) => {
+
+			const pathList = vnode.attrs.pathList;
+
+			return m('.dirnav.pure-g',
+        m('span.pure-u',
+				  m('i.dirnav__btn.dirnav__up.fas.fa-arrow-up', {
+				  		onclick: () => {
+								vnode.attrs.onUp();
+				  		},
+				  	}
+				  ),
+				  m('i.dirnav__btn.dirnav__back.fas.fa-arrow-left', {
+				  		onclick: () => {
+								vnode.attrs.onBack();
+				  		},
+				  	}
+				  ),
+				  m('i.dirnav__btn.dirnav__forward.fas.fa-arrow-right', {
+				  		onclick: () => {
+								vnode.attrs.onForward();
+				  		},
+				  	}
+				  ),
+				),
+				m(BreadcrumbPath, { pathList }),
+        m('span.pure-u.dirnav__btn.dirnav__upload',
+				  m('i.fas.fa-cloud-upload-alt', {
+				  		onclick: () => {
+								vnode.attrs.onUpload();
+				  		},
+				  	}
+				  )
+				),
+			);
+		}
+	};
+};
+
 const BreadcrumbPath = () => {
   return {
-    view: (vnode) => m('.breadcrumb-path.pure-g',
+    view: (vnode) => m('span.breadcrumb-path.pure-u',
       m('span.pure-u', '/'),
       vnode.attrs.pathList.map((elem) => {
         return m('span.pure-u', elem + '/');
@@ -74,16 +124,6 @@ const BreadcrumbPath = () => {
 const Directory = () => {
   return {
     view: (vnode) => m('.directory',
-      m('.pure-u-1', {
-          onclick: () => {
-            vnode.attrs.clicked('..');
-          },
-        },
-        m(Item, {
-          name: '..',
-          data: {},
-        }),
-      ),
       Object.keys(vnode.attrs.items).map((key) => {
         return m('.pure-g',
           m('.pure-u-1', {
