@@ -15,6 +15,10 @@ const Home = {
 			withCredentials: true,
     })
     .then(function(res) {
+			if (res === null) {
+				m.route.set('/login');
+			}
+
       console.log(res);
       State.fs = res;
       State.curDir = res;
@@ -196,11 +200,15 @@ function Login() {
                 data: {
                   email,
                 },
+								deserialize: (data) => data,
               })
               .then(function(response) {
 								console.log(response);
-                m.route.set('/home');
-              });
+                m.route.set('/enterkey');
+              })
+							.catch((e) => {
+							  console.error(e);
+							});
             },
           },
           "Submit"
@@ -209,6 +217,51 @@ function Login() {
     }
   }
 }
+
+const EnterKey = () => {
+
+	let key = "";
+
+	return {
+		view: (vnode) => {
+		  return m('main',
+        m('h1', "Complete Login"),
+        m('p', "Check your email for a key and enter it here"),
+        m('input', {
+          type: 'text',
+          onchange: function(e) {
+            key = e.target.value;
+          },
+        },
+        ),
+        m('button', {
+            onclick: function() {
+              console.log(key);
+
+              m.request({
+                url: State.remoAddr + '/login',
+                method: 'POST',
+								withCredentials: true,
+                data: {
+                  key,
+                },
+								deserialize: (data) => data,
+              })
+              .then(function(response) {
+								console.log(response);
+                m.route.set('/home');
+              })
+							.catch((e) => {
+							  console.error(e);
+							});
+            },
+          },
+          "Submit"
+        ),
+      );
+		},
+	};
+};
 
 const Data = {
   view: function() {
@@ -222,5 +275,6 @@ const root = document.getElementById('root');
 m.route(root, '/',{
   '/': Home,
   '/login': Login,
+  '/enterkey': EnterKey,
   '/data': Data,
 });
