@@ -1,3 +1,6 @@
+import { RPC } from './rpc.js';
+
+
 const State = {
   fs: null,
   curDir: null,
@@ -9,6 +12,10 @@ const Home = {
   oninit: function() {
 
     console.log(State);
+
+    State.rpc = new RPC({ address: '127.0.0.1', port: 9001, secure: false });
+
+    //State.rpc.uploadFile();
 
     m.request({
       url: State.remoAddr + '/',
