@@ -1,4 +1,4 @@
-import { RPC } from './rpc.js';
+import { RPCBuilder } from './rpc.js';
 
 
 const State = {
@@ -13,9 +13,15 @@ const Home = {
 
     console.log(State);
 
-    State.rpc = new RPC({ address: '127.0.0.1', port: 9001, secure: false });
+    (async () => {
+      State.rpc = await new RPCBuilder()
+        .address('127.0.0.1')
+        .port(9001)
+        .secure(false)
+        .build();
 
-    //State.rpc.uploadFile();
+      State.rpc.uploadFile('/og.txt', "Hi there");
+    })();
 
     m.request({
       url: State.remoAddr + '/',
@@ -114,7 +120,17 @@ const DirNav = () => {
 								vnode.attrs.onUpload();
 				  		},
 				  	}
-				  )
+				  ),
+          m('input', {
+            type: 'file',
+            onchange: (e) => {
+              const file = e.target.files[0];
+              console.log(file);
+              const path = '/' + State.curPath.join('/') + file.name
+              State.rpc.uploadFile(path, file);
+            },
+          },
+          "Do it")
 				),
 			);
 		}
