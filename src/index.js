@@ -13,14 +13,16 @@ const Home = {
 
     console.log(State);
 
+    // TODO: do proper cookie parsing
+    const key = document.cookie.split('=')[1];
+
     (async () => {
       State.rpc = await new RPCBuilder()
         .address('127.0.0.1')
         .port(9001)
+        .authKey(key)
         .secure(false)
         .build();
-
-      State.rpc.uploadFile('/og.txt', "Hi there");
     })();
 
     m.request({

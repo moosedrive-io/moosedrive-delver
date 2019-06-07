@@ -10,6 +10,7 @@ class RPC {
 
     this._nextRequestId = 1;
     this._mux = mux;
+    this._authKey = null;
     
     mux.onControlMessage((rawMessage) => {
       const message = decodeObject(rawMessage)
@@ -18,6 +19,10 @@ class RPC {
       if (message.id !== undefined) {
       }
     });
+  }
+
+  setAuthKey(key) {
+    this._authKey = key;
   }
 
   uploadFile(path, file) {
@@ -29,6 +34,7 @@ class RPC {
       jsonrpc: '2.0',
       method: 'uploadFile',
       params: {
+        key: this._authKey,
         path,
       },
     }));
@@ -45,6 +51,7 @@ class RPCBuilder {
   constructor() {
     this._address = '127.0.0.1';
     this._port = 9001;
+    this._authKey = null;
     this._secure = true;
   }
 
@@ -55,6 +62,11 @@ class RPCBuilder {
 
   port(value) {
     this._port = value;
+    return this;
+  }
+  
+  authKey(value) {
+    this._authKey = value;
     return this;
   }
 
@@ -71,7 +83,11 @@ class RPCBuilder {
       secure: this._secure,
     });
 
-    return new RPC(mux);
+    const rpc = new RPC(mux);
+
+    rpc.setAuthKey(this._authKey);
+
+    return rpc;
   }
 }
 
