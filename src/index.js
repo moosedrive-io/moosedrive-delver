@@ -1,4 +1,4 @@
-import { RPCBuilder } from './rpc.js';
+import { ClientBuilder } from 'remofs-client';
 
 
 const State = {
@@ -17,7 +17,7 @@ const Home = {
     const key = document.cookie.split('=')[1];
 
     (async () => {
-      State.rpc = await new RPCBuilder()
+      State.client = await new ClientBuilder()
         .address('127.0.0.1')
         .port(9001)
         .authKey(key)
@@ -129,7 +129,7 @@ const DirNav = () => {
               const file = e.target.files[0];
               console.log(file);
               const path = '/' + State.curPath.join('/') + file.name
-              State.rpc.uploadFile(path, file);
+              State.client.uploadFile(path, file);
             },
           },
           "Do it")
