@@ -5,7 +5,7 @@ const State = {
   fs: null,
   curDir: null,
   curPath: null,
-  remoAddr: 'http://localhost:9001',
+  remoAddr: window.location.origin,
 };
 
 const Home = {
@@ -18,8 +18,6 @@ const Home = {
 
     (async () => {
       State.client = await new ClientBuilder()
-        .address('127.0.0.1')
-        .port(9001)
         .authKey(key)
         .secure(false)
         .build();
@@ -163,6 +161,18 @@ const Directory = () => {
             m(Item, {
               name: key,
               data: vnode.attrs.items[key],
+              ondownload: async () => {
+                console.log("download");
+                const path = '/' + State.curPath.concat([key]).join('/');
+                const producer = await State.client.download(path);
+
+                producer.onData((data) => {
+                  console.log("DATA");
+                  producer.request(1);
+                });
+
+                producer.request(10);
+              },
             }),
           ),
         );
@@ -184,13 +194,25 @@ const Item = () => {
 				  m('.item',
             m('i.fas.fa-file'),
 						m('span.item__name', name),
+            m('i.item__download_btn.fas.fa-download', {
+              onclick: (e) => {
+                vnode.attrs.ondownload();
+                e.preventDefault();
+              },
+            }),
 					),
 				);
 			}
 			else {
 				return m('.item',
           m('i.fas.fa-folder'),
-					m('span.item__name', name)
+					m('span.item__name', name),
+          m('i.item__download_btn.fas.fa-download', {
+            onclick: (e) => {
+              vnode.attrs.ondownload();
+              e.stopPropagation();
+            },
+          }),
 				);
 			}
 		},
