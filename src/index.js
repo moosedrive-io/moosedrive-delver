@@ -167,7 +167,7 @@ const Directory = () => {
                 const producer = await State.client.download(path);
 
                 producer.onData((data) => {
-                  console.log("DATA");
+                  console.log("DATA", data.length);
                   producer.request(1);
                 });
 
@@ -194,12 +194,9 @@ const Item = () => {
 				  m('.item',
             m('i.fas.fa-file'),
 						m('span.item__name', name),
-            m('i.item__download_btn.fas.fa-download', {
-              onclick: (e) => {
-                vnode.attrs.ondownload();
-                e.preventDefault();
-              },
-            }),
+            m('a.file', { href: url + '?download=true' },
+              m('i.item__download_btn.fas.fa-download'),
+            ),
 					),
 				);
 			}
@@ -207,12 +204,15 @@ const Item = () => {
 				return m('.item',
           m('i.fas.fa-folder'),
 					m('span.item__name', name),
-          m('i.item__download_btn.fas.fa-download', {
-            onclick: (e) => {
-              vnode.attrs.ondownload();
-              e.stopPropagation();
+          m('a.file',
+            { 
+              href: url + '?download=true',
+              onclick: (e) => {
+                e.stopPropagation();
+              },
             },
-          }),
+            m('i.item__download_btn.fas.fa-download'),
+          ),
 				);
 			}
 		},
