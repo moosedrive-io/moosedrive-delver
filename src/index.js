@@ -161,18 +161,18 @@ const Directory = () => {
             m(Item, {
               name: key,
               data: vnode.attrs.items[key],
-              ondownload: async () => {
-                console.log("download");
-                const path = '/' + State.curPath.concat([key]).join('/');
-                const producer = await State.client.download(path);
+              //ondownload: async () => {
 
-                producer.onData((data) => {
-                  console.log("DATA", data.length);
-                  producer.request(1);
-                });
+              //  const path = '/' + State.curPath.concat([key]).join('/');
+              //  const { result, producer } = await State.client.download(path);
 
-                producer.request(10);
-              },
+              //  producer.onData((data) => {
+              //    console.log("DATA", data.length);
+              //    producer.request(1);
+              //  });
+
+              //  producer.request(10);
+              //},
             }),
           ),
         );
@@ -194,7 +194,21 @@ const Item = () => {
 				  m('.item',
             m('i.fas.fa-file'),
 						m('span.item__name', name),
-            m('a.file', { href: url + '?download=true' },
+            //m('i.item__download_btn.fas.fa-download',
+            //  {
+            //    onclick: (e) => {
+            //      vnode.attrs.ondownload();
+            //      e.preventDefault();
+            //    },
+            //  }
+            //),
+            m('a.file',
+              {
+                href: url + '?download=true',
+                onclick: (e) => {
+                  vnode.attrs.ondownload();
+                },
+              },
               m('i.item__download_btn.fas.fa-download'),
             ),
 					),
