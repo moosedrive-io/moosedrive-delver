@@ -24,7 +24,7 @@ const Home = {
     })();
 
     m.request({
-      url: State.remoAddr + '/',
+      url: State.remoAddr + '?ignoreIndex=true',
 			withCredentials: true,
     })
     .then(function(res) {
@@ -75,7 +75,7 @@ const Home = {
               const target = State.curDir.children[key];
               if (target.type === 'dir') {
                 State.curPath.push(key);
-                State.curDir = State.curDir.children[key];
+                State.curDir = target;
               }
             },
           }),
