@@ -100,18 +100,18 @@ const DirNav = () => {
 				  		},
 				  	}
 				  ),
-				  m('i.dirnav__btn.dirnav__back.fas.fa-arrow-left', {
-				  		onclick: () => {
-								vnode.attrs.onBack();
-				  		},
-				  	}
-				  ),
-				  m('i.dirnav__btn.dirnav__forward.fas.fa-arrow-right', {
-				  		onclick: () => {
-								vnode.attrs.onForward();
-				  		},
-				  	}
-				  ),
+				  //m('i.dirnav__btn.dirnav__back.fas.fa-arrow-left', {
+				  //		onclick: () => {
+					//			vnode.attrs.onBack();
+				  //		},
+				  //	}
+				  //),
+				  //m('i.dirnav__btn.dirnav__forward.fas.fa-arrow-right', {
+				  //		onclick: () => {
+					//			vnode.attrs.onForward();
+				  //		},
+				  //	}
+				  //),
 				),
 				m(BreadcrumbPath, { pathList }),
         m('span.pure-u.dirnav__btn.dirnav__upload',
