@@ -64,9 +64,6 @@ const Home = {
 						onForward: () => {
 							console.log("forward");
 						},
-						onUpload: () => {
-							console.log("upload");
-						},
 					}),
           m(Directory, {
             items: State.curDir.children,
@@ -115,27 +112,55 @@ const DirNav = () => {
 				),
 				m(BreadcrumbPath, { pathList }),
         m('span.pure-u.dirnav__btn.dirnav__upload',
-				  m('i.fas.fa-cloud-upload-alt', {
-				  		onclick: () => {
-								vnode.attrs.onUpload();
-				  		},
-				  	}
-				  ),
-          m('input', {
-            type: 'file',
-            onchange: (e) => {
-              const file = e.target.files[0];
-              console.log(file);
-              const path = '/' + State.curPath.join('/') + file.name
-              State.client.uploadFile(path, file);
-            },
-          },
-          "Do it")
+          m(UploadButton,
+            {
+              onSelection: (e) => {
+                const file = e.target.files[0];
+                console.log(file);
+                const path = '/' + State.curPath.join('/') + file.name
+                State.client.uploadFile(path, file);
+              },
+            }
+          ),
 				),
 			);
 		}
 	};
 };
+
+
+function UploadButton() {
+
+  let uploadElem;
+
+  return {
+    oncreate: (vnode) => {
+      uploadElem = vnode.dom.querySelector('.upload-btn__input');
+      uploadElem.addEventListener('change', (e) => {
+        vnode.attrs.onSelection(e);
+      });
+    },
+    view: (vnode) => {
+      return m('span.upload-btn',
+        m('input.upload-btn__input',
+          {
+            type: 'file',
+            //multiple: true,
+            //directory: true,
+            //webkitdirectory: true,
+            //mozdirectory: true,
+          }),
+        m('i.fas.fa-cloud-upload-alt',
+          {
+            onclick: () => {
+              uploadElem.click();
+            }
+          },
+        ),
+      );
+    },
+  };
+}
 
 const BreadcrumbPath = () => {
   return {
