@@ -117,7 +117,7 @@ const DirNav = () => {
               onSelection: (e) => {
                 const file = e.target.files[0];
                 console.log(file);
-                const path = '/' + State.curPath.join('/') + file.name
+                const path = '/' + State.curPath.join('/') + '/' + file.name
                 State.client.uploadFile(path, file);
               },
             }
