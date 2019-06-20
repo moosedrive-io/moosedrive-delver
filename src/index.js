@@ -21,6 +21,16 @@ const Home = {
         .authKey(key)
         .secure(false)
         .build();
+
+      const producer = await State.client.getMetaStream('/one/two');
+
+      producer.onData((data) => {
+        console.log("data");
+        console.log(data);
+        producer.request(1);
+      });
+
+      producer.request(1);
     })();
 
     m.request({
