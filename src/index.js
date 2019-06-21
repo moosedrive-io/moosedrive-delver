@@ -209,10 +209,17 @@ const BreadcrumbPath = () => {
   };
 };
 
-const Directory = () => {
+function Directory() {
+  // this is used to achieve a "natural sort". see
+  // https://stackoverflow.com/a/38641281/943814
+  const sorter = new Intl.Collator(undefined, {
+    numeric: true,
+    sensitivity: 'base'
+  });
+
   return {
     view: (vnode) => m('.directory',
-      Object.keys(vnode.attrs.items).map((key) => {
+      Object.keys(vnode.attrs.items).sort(sorter.compare).map((key) => {
         return m('.pure-g',
           m('.pure-u-1', {
               onclick: () => {
@@ -240,7 +247,7 @@ const Directory = () => {
       })
     ),
   };
-};
+}
 
 const Item = () => {
   return {
