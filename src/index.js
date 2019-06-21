@@ -1,4 +1,5 @@
 import { ClientBuilder } from 'remofs-client';
+import { decodeObject } from 'omnistreams';
 
 
 const State = {
@@ -22,12 +23,29 @@ const Home = {
         .secure(false)
         .build();
 
-      const producer = await State.client.getMetaStream('/one/two');
+      const producer = await State.client.getMetaStream('/');
 
       producer.onData((data) => {
-        console.log("data");
-        console.log(data);
         producer.request(1);
+
+        const update = decodeObject(data);
+        console.log(update);
+
+        const path = update.path.split('/').slice(1);
+        console.log(path);
+
+        const filename = path[path.length - 1];
+
+        let curDir = State.fs;
+
+        for (const next of path.slice(0, path.length - 1)) {
+          curDir = curDir.children[next];
+          console.log(curDir);
+        }
+
+        curDir.children[filename] = update.meta;
+
+        m.redraw();
       });
 
       producer.request(1);
@@ -127,7 +145,15 @@ const DirNav = () => {
               onSelection: (e) => {
                 const file = e.target.files[0];
                 console.log(file);
-                const path = '/' + State.curPath.join('/') + '/' + file.name
+
+                let path;
+                if (State.curPath.length === 0) {
+                  path = '/' + file.name
+                }
+                else {
+                  path = '/' + State.curPath.join('/') + '/' + file.name
+                }
+
                 State.client.uploadFile(path, file);
               },
             }
