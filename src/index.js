@@ -29,6 +29,8 @@ const Home = {
         producer.request(1);
 
         const update = decodeObject(data);
+
+        console.log("meta update");
         console.log(update);
 
         const path = update.path.split('/').slice(1);
@@ -43,7 +45,12 @@ const Home = {
           console.log(curDir);
         }
 
-        curDir.children[filename] = update.meta;
+        if (update.meta === null) {
+          delete curDir.children[filename];
+        }
+        else {
+          curDir.children[filename] = update.meta;
+        }
 
         m.redraw();
       });
