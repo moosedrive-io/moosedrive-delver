@@ -103,6 +103,21 @@ const Home = {
                 State.curDir = target;
               }
             },
+            onDeleteItem: async (key) => {
+              console.log("delete", key);
+              const target = State.curDir.children[key];
+              const path = '/' + (State.curPath.length === 0 ?
+                key :
+                State.curPath.join('/') + '/' + key);
+              console.log(path, target);
+              try {
+                const result = await State.client.delete(path);
+                console.log(result);
+              }
+              catch (e) {
+                console.error("Failed to delete:", path, e);
+              }
+            },
           }),
         ),
         m('.right-panel.pure-u-1-4'),
@@ -251,6 +266,9 @@ function Directory() {
             m(Item, {
               name: key,
               data: vnode.attrs.items[key],
+              onDelete: () => {
+                vnode.attrs.onDeleteItem(key);
+              },
               //ondownload: async () => {
 
               //  const path = '/' + State.curPath.concat([key]).join('/');
@@ -294,7 +312,7 @@ const Item = () => {
             m(DeleteButton,
               {
                 onDelete: () => {
-                  console.log("delete");
+                  vnode.attrs.onDelete();
                 },
               }
             ),
@@ -317,7 +335,7 @@ const Item = () => {
           m(DeleteButton,
             {
               onDelete: () => {
-                console.log("delete");
+                vnode.attrs.onDelete();
               },
             }
           ),
