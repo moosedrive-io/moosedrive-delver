@@ -167,25 +167,36 @@ const DirNav = () => {
 
 function UploadButton() {
 
-  let uploadElem;
+  let fileUploadElem;
+  let folderUploadElem;
 
   return {
     oncreate: (vnode) => {
-      uploadElem = vnode.dom.querySelector('.upload-btn__input');
-      uploadElem.addEventListener('change', (e) => {
+      fileUploadElem = vnode.dom.querySelector('#file-input');
+      fileUploadElem.addEventListener('change', (e) => {
         vnode.attrs.onSelection(e);
       });
+
+      folderUploadElem = vnode.dom.querySelector('#folder-input');
     },
     view: (vnode) => {
       return m('span.upload-btn',
-        m('input.upload-btn__input',
+        m('input.#file-input.upload-btn__input',
           {
             type: 'file',
-            //multiple: true,
-            //directory: true,
-            //webkitdirectory: true,
-            //mozdirectory: true,
-          }),
+            multiple: true,
+          }
+        ),
+        m('input.#folder-input.upload-btn__input',
+          {
+            type: 'file',
+            // TODO: which of the following 3 are actually necessary? It seems
+            // to at least need webkitdirectory and mozdirectory in Firefox
+            directory: true,
+            webkitdirectory: true,
+            mozdirectory: true,
+          }
+        ),
         m(ChoiceButton,
           {
             iconClasses: '.fas.fa-cloud-upload-alt',
@@ -194,11 +205,11 @@ function UploadButton() {
             option2Text: "Folder",
             onOption1: () => {
               console.log("files");
-              //vnode.attrs.onDelete();
+              fileUploadElem.click();
             },
             onOption2: () => {
               console.log("folder");
-              //vnode.attrs.onDelete();
+              folderUploadElem.click();
             },
             onCancel: () => {
             },
