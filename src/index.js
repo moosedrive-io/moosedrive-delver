@@ -186,12 +186,23 @@ function UploadButton() {
             //webkitdirectory: true,
             //mozdirectory: true,
           }),
-        m('i.fas.fa-cloud-upload-alt',
+        m(ChoiceButton,
           {
-            onclick: () => {
-              uploadElem.click();
-            }
-          },
+            iconClasses: '.fas.fa-cloud-upload-alt',
+            promptText: "Upload:",
+            option1Text: "Files",
+            option2Text: "Folder",
+            onOption1: () => {
+              console.log("files");
+              //vnode.attrs.onDelete();
+            },
+            onOption2: () => {
+              console.log("folder");
+              //vnode.attrs.onDelete();
+            },
+            onCancel: () => {
+            },
+          }
         ),
       );
     },
@@ -316,13 +327,35 @@ const Item = () => {
 
 
 function DeleteButton() {
+  return {
+    view: (vnode) => {
+      return m(ChoiceButton,
+        {
+          iconClasses: '.fas.fa-times',
+          promptText: "Really delete?",
+          option1Text: "Yes",
+          onOption1: () => {
+            vnode.attrs.onDelete();
+          },
+          onOption2: () => {
+          },
+          onCancel: () => {
+          },
+        },
+      );
+    },
+  };
+}
+
+
+function ChoiceButton() {
 
   let state = 'unselected';
 
   return {
     view: (vnode) => {
-      return m('span.btn.delete-btn',
-        m('i.fas.fa-times',
+      return m('span.btn.choice-btn',
+        m('i' + vnode.attrs.iconClasses,
           { 
             onclick: (e) => {
               state = 'confirm';
@@ -334,30 +367,44 @@ function DeleteButton() {
         state === 'unselected' ?
         null
         :
-        m('span.delete-btn__confirm',
+        m('span.choice-btn__confirm',
           {
             onclick: (e) => {
               e.stopPropagation();
               e.preventDefault();
             }
           },
-          "Really delete?",
-          m('button.delete-btn__yes-btn',
+          vnode.attrs.promptText,
+          m('button.choice-btn__option1-btn',
             {
               onclick: (e) => {
-                vnode.attrs.onDelete();
+                vnode.attrs.onOption1();
                 state = 'unselected';
               }
             },
-            "Yes",
+            vnode.attrs.option1Text,
           ),
-          m('button.delete-btn__no-btn',
+          vnode.attrs.option2Text ?
+            m('button.choice-btn__option2-btn',
+              {
+                onclick: (e) => {
+                  vnode.attrs.onOption2();
+                  state = 'unselected';
+                }
+              },
+              vnode.attrs.option2Text
+          )
+          :
+          null
+          ,
+          m('button.choice-btn__cancel-btn',
             {
               onclick: (e) => {
+                vnode.attrs.onCancel();
                 state = 'unselected';
               }
             },
-            "No",
+            "Cancel",
           ),
         ),
       );
