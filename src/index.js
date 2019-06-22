@@ -258,26 +258,32 @@ const Item = () => {
       const url = encodeURI(State.remoAddr + '/' + path);
 
       if (type === 'file') {
-				return m('a.file', { href: url, target: '_blank' },
+				return m('a.file',
+          { 
+            href: url,
+            target: '_blank',
+            onclick: (e) => {
+              //e.preventDefault();
+            },
+          },
 				  m('.item',
             m('i.fas.fa-file'),
 						m('span.item__name', name),
-            //m('i.item__download_btn.fas.fa-download',
-            //  {
-            //    onclick: (e) => {
-            //      vnode.attrs.ondownload();
-            //      e.preventDefault();
-            //    },
-            //  }
-            //),
+            m(DeleteButton,
+              {
+                onDelete: () => {
+                  console.log("delete");
+                },
+              }
+            ),
             m('a.file',
               {
                 href: url + '?download=true',
                 onclick: (e) => {
-                  vnode.attrs.ondownload();
+                  //vnode.attrs.ondownload();
                 },
               },
-              m('i.item__download_btn.fas.fa-download'),
+              m('i.btn.item__download_btn.fas.fa-download'),
             ),
 					),
 				);
@@ -286,6 +292,13 @@ const Item = () => {
 				return m('.item',
           m('i.fas.fa-folder'),
 					m('span.item__name', name),
+          m(DeleteButton,
+            {
+              onDelete: () => {
+                console.log("delete");
+              },
+            }
+          ),
           m('a.file',
             { 
               href: url + '?download=true',
@@ -293,13 +306,64 @@ const Item = () => {
                 e.stopPropagation();
               },
             },
-            m('i.item__download_btn.fas.fa-download'),
+            m('i.btn.item__download_btn.fas.fa-download'),
           ),
 				);
 			}
 		},
 	};
 };
+
+
+function DeleteButton() {
+
+  let state = 'unselected';
+
+  return {
+    view: (vnode) => {
+      return m('span.btn.delete-btn',
+        m('i.fas.fa-times',
+          { 
+            onclick: (e) => {
+              state = 'confirm';
+              e.stopPropagation();
+              e.preventDefault();
+            },
+          },
+        ),
+        state === 'unselected' ?
+        null
+        :
+        m('span.delete-btn__confirm',
+          {
+            onclick: (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          },
+          "Really delete?",
+          m('button.delete-btn__yes-btn',
+            {
+              onclick: (e) => {
+                vnode.attrs.onDelete();
+                state = 'unselected';
+              }
+            },
+            "Yes",
+          ),
+          m('button.delete-btn__no-btn',
+            {
+              onclick: (e) => {
+                state = 'unselected';
+              }
+            },
+            "No",
+          ),
+        ),
+      );
+    },
+  };
+}
 
 function Login() {
 
