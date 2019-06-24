@@ -62,12 +62,12 @@ const Home = {
 
     m.request({
       url: State.remoAddr + '?ignoreIndex=true',
-			withCredentials: true,
+      withCredentials: true,
     })
     .then(function(res) {
-			if (res === null) {
-				m.route.set('/login');
-			}
+      if (res === null) {
+        m.route.set('/login');
+      }
 
       console.log(res);
       State.fs = res;
@@ -86,22 +86,22 @@ const Home = {
         m('.left-panel.pure-u-1-4'),
         m('.center-panel.pure-u-1-2',
           m(DirNav, {
-						pathList: State.curPath,
-						onUp: () => {
-							State.curPath.pop();
+            pathList: State.curPath,
+            onUp: () => {
+              State.curPath.pop();
               State.curDir = State.fs;
 
               for (const part of State.curPath) {
                 State.curDir = State.curDir.children[part];
               }
-						},
-						onBack: () => {
-							console.log("back");
-						},
-						onForward: () => {
-							console.log("forward");
-						},
-					}),
+            },
+            onBack: () => {
+              console.log("back");
+            },
+            onForward: () => {
+              console.log("forward");
+            },
+          }),
           m(Directory, {
             curPath: State.curPath,
             remoAddr: State.remoAddr,
@@ -138,33 +138,33 @@ const Home = {
 };
 
 const DirNav = () => {
-	return {
-		view: (vnode) => {
+  return {
+    view: (vnode) => {
 
-			const pathList = vnode.attrs.pathList;
+      const pathList = vnode.attrs.pathList;
 
-			return m('.dirnav.pure-g',
+      return m('.dirnav.pure-g',
         m('span.pure-u',
-				  m('i.dirnav__btn.dirnav__up.fas.fa-arrow-up', {
-				  		onclick: () => {
-								vnode.attrs.onUp();
-				  		},
-				  	}
-				  ),
-				  //m('i.dirnav__btn.dirnav__back.fas.fa-arrow-left', {
-				  //		onclick: () => {
-					//			vnode.attrs.onBack();
-				  //		},
-				  //	}
-				  //),
-				  //m('i.dirnav__btn.dirnav__forward.fas.fa-arrow-right', {
-				  //		onclick: () => {
-					//			vnode.attrs.onForward();
-				  //		},
-				  //	}
-				  //),
-				),
-				m(BreadcrumbPath, { pathList }),
+          m('i.dirnav__btn.dirnav__up.fas.fa-arrow-up', {
+              onclick: () => {
+                vnode.attrs.onUp();
+              },
+            }
+          ),
+          //m('i.dirnav__btn.dirnav__back.fas.fa-arrow-left', {
+          //    onclick: () => {
+          //      vnode.attrs.onBack();
+          //    },
+          //  }
+          //),
+          //m('i.dirnav__btn.dirnav__forward.fas.fa-arrow-right', {
+          //    onclick: () => {
+          //      vnode.attrs.onForward();
+          //    },
+          //  }
+          //),
+        ),
+        m(BreadcrumbPath, { pathList }),
         m('span.pure-u.dirnav__btn.dirnav__upload',
           m(UploadButton,
             {
@@ -184,10 +184,10 @@ const DirNav = () => {
               },
             }
           ),
-				),
-			);
-		}
-	};
+        ),
+      );
+    }
+  };
 };
 
 
@@ -286,19 +286,19 @@ function Login() {
               m.request({
                 url: State.remoAddr + '/login',
                 method: 'POST',
-								withCredentials: true,
+                withCredentials: true,
                 data: {
                   email,
                 },
-								deserialize: (data) => data,
+                deserialize: (data) => data,
               })
               .then(function(response) {
-								console.log(response);
+                console.log(response);
                 m.route.set('/enterkey');
               })
-							.catch((e) => {
-							  console.error(e);
-							});
+              .catch((e) => {
+                console.error(e);
+              });
             },
           },
           "Submit"
@@ -310,11 +310,11 @@ function Login() {
 
 const EnterKey = () => {
 
-	let key = "";
+  let key = "";
 
-	return {
-		view: (vnode) => {
-		  return m('main',
+  return {
+    view: (vnode) => {
+      return m('main',
         m('h1', "Complete Login"),
         m('p', "Check your email for a key and enter it here"),
         m('input', {
@@ -331,26 +331,26 @@ const EnterKey = () => {
               m.request({
                 url: State.remoAddr + '/login',
                 method: 'POST',
-								withCredentials: true,
+                withCredentials: true,
                 data: {
                   key,
                 },
-								deserialize: (data) => data,
+                deserialize: (data) => data,
               })
               .then(function(response) {
-								console.log(response);
+                console.log(response);
                 m.route.set('/home');
               })
-							.catch((e) => {
-							  console.error(e);
-							});
+              .catch((e) => {
+                console.error(e);
+              });
             },
           },
           "Submit"
         ),
       );
-		},
-	};
+    },
+  };
 };
 
 const Data = {

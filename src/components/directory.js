@@ -49,13 +49,13 @@ function Directory() {
 const Item = () => {
   return {
     view: (vnode) => {
-		  const name = vnode.attrs.name;
-			const type = vnode.attrs.data.type;
+      const name = vnode.attrs.name;
+      const type = vnode.attrs.data.type;
       const path = vnode.attrs.curPath.concat([name]).join('/');
       const url = encodeURI(vnode.attrs.remoAddr + '/' + path);
 
       if (type === 'file') {
-				return m('a.file',
+        return m('a.file',
           { 
             href: url,
             target: '_blank',
@@ -63,9 +63,9 @@ const Item = () => {
               //e.preventDefault();
             },
           },
-				  m('.item',
+          m('.item',
             m('i.fas.fa-file'),
-						m('span.item__name', name),
+            m('span.item__name', name),
             m(DeleteButton,
               {
                 onDelete: () => {
@@ -82,13 +82,13 @@ const Item = () => {
               },
               m('i.btn.item__download_btn.fas.fa-download'),
             ),
-					),
-				);
-			}
-			else {
-				return m('.item',
+          ),
+        );
+      }
+      else {
+        return m('.item',
           m('i.fas.fa-folder'),
-					m('span.item__name', name),
+          m('span.item__name', name),
           m(DeleteButton,
             {
               onDelete: () => {
@@ -105,10 +105,10 @@ const Item = () => {
             },
             m('i.btn.item__download_btn.fas.fa-download'),
           ),
-				);
-			}
-		},
-	};
+        );
+      }
+    },
+};
 };
 
 export {
