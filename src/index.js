@@ -1,5 +1,7 @@
 import { ClientBuilder } from 'remofs-client';
 import { decodeObject } from 'omnistreams';
+import { ChoiceButton } from './components/buttons.js';
+import { Directory } from './components/directory.js';
 
 
 const State = {
@@ -101,6 +103,8 @@ const Home = {
 						},
 					}),
           m(Directory, {
+            curPath: State.curPath,
+            remoAddr: State.remoAddr,
             items: State.curDir.children,
             clicked: (key) => {
               console.log(State.curDir);
@@ -200,6 +204,10 @@ function UploadButton() {
       });
 
       folderUploadElem = vnode.dom.querySelector('#folder-input');
+      folderUploadElem.addEventListener('change', (e) => {
+        console.log(e);
+        //vnode.attrs.onSelection(e);
+      });
     },
     view: (vnode) => {
       return m('span.upload-btn',
@@ -223,15 +231,15 @@ function UploadButton() {
           {
             iconClasses: '.fas.fa-cloud-upload-alt',
             promptText: "Upload:",
-            option1Text: "Files",
-            option2Text: "Folder",
+            option1Text: "Folder",
+            option2Text: "File(s)",
             onOption1: () => {
-              console.log("files");
-              fileUploadElem.click();
-            },
-            onOption2: () => {
               console.log("folder");
               folderUploadElem.click();
+            },
+            onOption2: () => {
+              console.log("files");
+              fileUploadElem.click();
             },
             onCancel: () => {
             },
@@ -253,200 +261,6 @@ const BreadcrumbPath = () => {
   };
 };
 
-function Directory() {
-  // this is used to achieve a "natural sort". see
-  // https://stackoverflow.com/a/38641281/943814
-  const sorter = new Intl.Collator(undefined, {
-    numeric: true,
-    sensitivity: 'base'
-  });
-
-  return {
-    view: (vnode) => m('.directory',
-      Object.keys(vnode.attrs.items).sort(sorter.compare).map((key) => {
-        return m('.pure-g',
-          m('.pure-u-1', {
-              onclick: () => {
-                vnode.attrs.clicked(key);
-              },
-            },
-            m(Item, {
-              name: key,
-              data: vnode.attrs.items[key],
-              onDelete: () => {
-                vnode.attrs.onDeleteItem(key);
-              },
-              //ondownload: async () => {
-
-              //  const path = '/' + State.curPath.concat([key]).join('/');
-              //  const { result, producer } = await State.client.download(path);
-
-              //  producer.onData((data) => {
-              //    console.log("DATA", data.length);
-              //    producer.request(1);
-              //  });
-
-              //  producer.request(10);
-              //},
-            }),
-          ),
-        );
-      })
-    ),
-  };
-}
-
-const Item = () => {
-  return {
-    view: (vnode) => {
-		  const name = vnode.attrs.name;
-			const type = vnode.attrs.data.type;
-      const path = State.curPath.concat([name]).join('/');
-      const url = encodeURI(State.remoAddr + '/' + path);
-
-      if (type === 'file') {
-				return m('a.file',
-          { 
-            href: url,
-            target: '_blank',
-            onclick: (e) => {
-              //e.preventDefault();
-            },
-          },
-				  m('.item',
-            m('i.fas.fa-file'),
-						m('span.item__name', name),
-            m(DeleteButton,
-              {
-                onDelete: () => {
-                  vnode.attrs.onDelete();
-                },
-              }
-            ),
-            m('a.file',
-              {
-                href: url + '?download=true',
-                onclick: (e) => {
-                  //vnode.attrs.ondownload();
-                },
-              },
-              m('i.btn.item__download_btn.fas.fa-download'),
-            ),
-					),
-				);
-			}
-			else {
-				return m('.item',
-          m('i.fas.fa-folder'),
-					m('span.item__name', name),
-          m(DeleteButton,
-            {
-              onDelete: () => {
-                vnode.attrs.onDelete();
-              },
-            }
-          ),
-          m('a.file',
-            { 
-              href: url + '?download=true',
-              onclick: (e) => {
-                e.stopPropagation();
-              },
-            },
-            m('i.btn.item__download_btn.fas.fa-download'),
-          ),
-				);
-			}
-		},
-	};
-};
-
-
-function DeleteButton() {
-  return {
-    view: (vnode) => {
-      return m(ChoiceButton,
-        {
-          iconClasses: '.fas.fa-times',
-          promptText: "Really delete?",
-          option1Text: "Yes",
-          onOption1: () => {
-            vnode.attrs.onDelete();
-          },
-          onOption2: () => {
-          },
-          onCancel: () => {
-          },
-        },
-      );
-    },
-  };
-}
-
-
-function ChoiceButton() {
-
-  let state = 'unselected';
-
-  return {
-    view: (vnode) => {
-      return m('span.btn.choice-btn',
-        m('i' + vnode.attrs.iconClasses,
-          { 
-            onclick: (e) => {
-              state = 'confirm';
-              e.stopPropagation();
-              e.preventDefault();
-            },
-          },
-        ),
-        state === 'unselected' ?
-        null
-        :
-        m('span.choice-btn__confirm',
-          {
-            onclick: (e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }
-          },
-          vnode.attrs.promptText,
-          m('button.choice-btn__option1-btn',
-            {
-              onclick: (e) => {
-                vnode.attrs.onOption1();
-                state = 'unselected';
-              }
-            },
-            vnode.attrs.option1Text,
-          ),
-          vnode.attrs.option2Text ?
-            m('button.choice-btn__option2-btn',
-              {
-                onclick: (e) => {
-                  vnode.attrs.onOption2();
-                  state = 'unselected';
-                }
-              },
-              vnode.attrs.option2Text
-          )
-          :
-          null
-          ,
-          m('button.choice-btn__cancel-btn',
-            {
-              onclick: (e) => {
-                vnode.attrs.onCancel();
-                state = 'unselected';
-              }
-            },
-            "Cancel",
-          ),
-        ),
-      );
-    },
-  };
-}
 
 function Login() {
 
