@@ -83,7 +83,25 @@ function ChoiceButton() {
   };
 }
 
+function OpenExternalButton() {
+  return {
+    view: (vnode) => {
+      return m('a.btn.open-external-btn',
+        { 
+          href: vnode.attrs.url,
+          target: '_blank',
+          //onclick: (e) => {
+          //  //e.preventDefault();
+          //},
+        },
+        m('i.fas.fa-external-link-alt'),
+      );
+    },
+  };
+}
+
 export {
   ChoiceButton,
-  DeleteButton
+  DeleteButton,
+  OpenExternalButton,
 };

@@ -59,14 +59,19 @@
 
       .item {
         border-bottom: 2px solid LightGray;
-        padding-top: 5px;
-        padding-bottom: 5px;
-        cursor: pointer;
         position: relative;
       }
 
-      .item:hover {
+      .item__header {
+        cursor: pointer;
+        padding-top: 5px;
+        padding-bottom: 5px;
+      }
+      .item__header:hover {
         background-color: #c6dcff;
+      }
+      .item__header__open-external-btn {
+        float: right;
       }
 
       .item__name {
@@ -107,6 +112,12 @@
       .choice-btn {
         float: right;
       }
+
+      .open-external-btn {
+        color: var(--text-color);
+        text-decoration: none;
+      }
+
 
     </style>
   </head>
