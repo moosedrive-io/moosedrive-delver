@@ -97,7 +97,6 @@ const Item = () => {
             );
           }
           else {
-            console.log(vnode.attrs.data.children);
             content = m(Directory,
               {
                 path: vnode.attrs.path.concat(name),
@@ -144,60 +143,6 @@ const Item = () => {
         ),
         content,
       );
-
-      //if (type === 'file') {
-      //  return m('a.file',
-      //    { 
-      //      href: url,
-      //      target: '_blank',
-      //      onclick: (e) => {
-      //        //e.preventDefault();
-      //      },
-      //    },
-      //    m('.item',
-      //      m('i.fas.fa-file'),
-      //      m('span.item__name', name),
-      //      m(DeleteButton,
-      //        {
-      //          onDelete: () => {
-      //            vnode.attrs.onDelete();
-      //          },
-      //        }
-      //      ),
-      //      m('a.file',
-      //        {
-      //          href: url + '?download=true',
-      //          onclick: (e) => {
-      //            //vnode.attrs.ondownload();
-      //          },
-      //        },
-      //        m('i.btn.item__download_btn.fas.fa-download'),
-      //      ),
-      //    ),
-      //  );
-      //}
-      //else {
-      //  return m('.item',
-      //    m('i.fas.fa-folder'),
-      //    m('span.item__name', name),
-      //    m(DeleteButton,
-      //      {
-      //        onDelete: () => {
-      //          vnode.attrs.onDelete();
-      //        },
-      //      }
-      //    ),
-      //    m('a.file',
-      //      { 
-      //        href: url + '?download=true',
-      //        onclick: (e) => {
-      //          e.stopPropagation();
-      //        },
-      //      },
-      //      m('i.btn.item__download_btn.fas.fa-download'),
-      //    ),
-      //  );
-      //}
     },
   };
 };
