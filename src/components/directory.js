@@ -11,6 +11,9 @@ function Directory() {
 
   return {
     view: (vnode) => m('.directory',
+      m('.directory__header',
+        '/' + vnode.attrs.path.join('/'),
+      ),
       Object.keys(vnode.attrs.items).sort(sorter.compare).map((key) => {
         return m('.pure-g',
           m('.pure-u-1', {
@@ -19,7 +22,7 @@ function Directory() {
               },
             },
             m(Item, {
-              curPath: vnode.attrs.curPath,
+              path: vnode.attrs.path,
               remoAddr: vnode.attrs.remoAddr,
               name: key,
               data: vnode.attrs.items[key],
@@ -41,7 +44,10 @@ function Directory() {
             }),
           ),
         );
-      })
+      }),
+      m('.directory__spacer',
+        //'/' + vnode.attrs.path.join('/'),
+      ),
     ),
   };
 }
@@ -54,7 +60,7 @@ const Item = () => {
     view: (vnode) => {
       const name = vnode.attrs.name;
       const type = vnode.attrs.data.type;
-      const path = vnode.attrs.curPath.concat([name]).join('/');
+      const path = vnode.attrs.path.concat([name]).join('/');
       const url = encodeURI(vnode.attrs.remoAddr + '/' + path);
 
       let icon;
@@ -85,9 +91,24 @@ const Item = () => {
           content = null;
           break;
         case 'expanded':
-          content = m('div',
-            "Hi there"
-          );
+          if (type === 'file') {
+            content = m('div',
+              "file"
+            );
+          }
+          else {
+            console.log(vnode.attrs.data.children);
+            content = m(Directory,
+              {
+                path: vnode.attrs.path.concat(name),
+                remoAddr: vnode.attrs.remoAddr,
+                items: vnode.attrs.data.children,
+                clicked: (key) => {
+                  console.log("es worky");
+                },
+              },
+            );
+          }
           break;
         default:
           throw new Error("Invalid state: " + state);
@@ -98,9 +119,7 @@ const Item = () => {
         m('.item__header',
           { 
             onclick: (e) => {
-              if (type === 'file') {
-                state = state === 'compact' ? 'expanded' : 'compact';
-              }
+              state = state === 'compact' ? 'expanded' : 'compact';
             },
           },
           m(icon),

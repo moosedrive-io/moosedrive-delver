@@ -102,34 +102,36 @@ const Home = {
               console.log("forward");
             },
           }),
-          m(Directory, {
-            curPath: State.curPath,
-            remoAddr: State.remoAddr,
-            items: State.curDir.children,
-            clicked: (key) => {
-              console.log(State.curDir);
-              const target = State.curDir.children[key];
-              if (target.type === 'dir') {
-                State.curPath.push(key);
-                State.curDir = target;
-              }
-            },
-            onDeleteItem: async (key) => {
-              console.log("delete", key);
-              const target = State.curDir.children[key];
-              const path = '/' + (State.curPath.length === 0 ?
-                key :
-                State.curPath.join('/') + '/' + key);
-              console.log(path, target);
-              try {
-                const result = await State.client.delete(path);
-                console.log(result);
-              }
-              catch (e) {
-                console.error("Failed to delete:", path, e);
-              }
-            },
-          }),
+          m('.main__directory',
+            m(Directory, {
+              path: State.curPath,
+              remoAddr: State.remoAddr,
+              items: State.curDir.children,
+              clicked: (key) => {
+                console.log(State.curDir);
+                //const target = State.curDir.children[key];
+                //if (target.type === 'dir') {
+                //  State.curPath.push(key);
+                //  State.curDir = target;
+                //}
+              },
+              onDeleteItem: async (key) => {
+                console.log("delete", key);
+                const target = State.curDir.children[key];
+                const path = '/' + (State.curPath.length === 0 ?
+                  key :
+                  State.curPath.join('/') + '/' + key);
+                console.log(path, target);
+                try {
+                  const result = await State.client.delete(path);
+                  console.log(result);
+                }
+                catch (e) {
+                  console.error("Failed to delete:", path, e);
+                }
+              },
+            }),
+          ),
         ),
         m('.right-panel.pure-u-1-4'),
       ),
