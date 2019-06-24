@@ -55,9 +55,11 @@ function Directory() {
 const Item = () => {
 
   let state = 'compact';
+  let settingsSelected = null;
 
   return {
     view: (vnode) => {
+
       const name = vnode.attrs.name;
       const type = vnode.attrs.data.type;
       const path = vnode.attrs.path.concat([name]).join('/');
@@ -84,31 +86,43 @@ const Item = () => {
         icon = 'i.fas.fa-folder';
       }
 
-      let content;
+      let preview;
 
       switch (state) {
         case 'compact':
-          content = null;
+          preview = null;
           break;
-        case 'expanded':
+        case 'expanded': {
+
+          let previewContent;
+
           if (type === 'file') {
-            content = m('div',
+            previewContent = m('div',
               "file"
             );
           }
           else {
-            content = m(Directory,
-              {
-                path: vnode.attrs.path.concat(name),
-                remoAddr: vnode.attrs.remoAddr,
-                items: vnode.attrs.data.children,
-                clicked: (key) => {
-                  console.log("es worky");
+            previewContent = m('.item__preview__content__directory',
+              m(Directory,
+                {
+                  path: vnode.attrs.path.concat(name),
+                  remoAddr: vnode.attrs.remoAddr,
+                  items: vnode.attrs.data.children,
+                  clicked: (key) => {
+                  },
                 },
-              },
+              ),
             );
           }
+
+          preview = m('.item__preview',
+            m('.item__preview__content',
+              previewContent,
+            ),
+          );
+
           break;
+        }
         default:
           throw new Error("Invalid state: " + state);
           break;
@@ -134,18 +148,133 @@ const Item = () => {
             {
               href: url + '?download=true',
               onclick: (e) => {
+                e.stopPropagation();
                 //vnode.attrs.ondownload();
               },
             },
-            m('i.btn.item__download_btn.fas.fa-download'),
+            m('i.btn.item__btn.fas.fa-download'),
+          ),
+          m('span.item__permissions-btn',
+            {
+              onclick: (e) => {
+                e.stopPropagation();
+                settingsSelected = settingsSelected === 'permissions' ? null : 'permissions';
+              },
+            },
+            m('i.btn.item__btn.fas.fa-key'),
+          ),
+          m('span.item__tags-btn',
+            {
+              onclick: (e) => {
+                e.stopPropagation();
+                settingsSelected = settingsSelected === 'tags' ? null : 'tags';
+              },
+            },
+            m('i.btn.item__btn.fas.fa-tags'),
           ),
           openExternalButton,
         ),
-        content,
+        m('.item__settings',
+          m(Settings,
+            {
+              selected: settingsSelected,
+            },
+          ),
+        ),
+        preview,
       );
     },
   };
 };
+
+
+const Settings = () => {
+
+  return {
+    view : (vnode) => {
+
+      const selected = vnode.attrs.selected;
+
+      let content = null;
+
+      switch (selected) {
+        case 'permissions':
+          content = m('.settings__permissions',
+            "Edit Permissions",
+          );
+          break;
+        case 'sharing':
+          content = m('.settings__sharing',
+            "Edit Sharing",
+          );
+          break;
+        case 'tags':
+          content = m('.settings__tags',
+            "Edit Tags",
+          );
+          break;
+      }
+
+      return m('.settings',
+        content
+      );
+    },
+  };
+};
+
+
+//const PreviewHeader = () => {
+//
+//  let selected = 'preview';
+//
+//  return {
+//    view: (vnode) => {
+//      return m('.preview-header',
+//        m('span.preview-header__preview-btn',
+//          m(TabButton,
+//            {
+//              text: 'Preview',
+//              selected: selected === 'preview',
+//              onSelected: () => {
+//                selected = 'preview';
+//              },
+//            },
+//          ),
+//        ),
+//        m('span.preview-header__sharing-btn',
+//          m(TabButton,
+//            {
+//              text: 'Sharing',
+//              selected: selected === 'sharing',
+//              onSelected: () => {
+//                selected = 'sharing';
+//              },
+//            },
+//          ),
+//        ),
+//      );
+//    },
+//  };
+//};
+//
+//
+//const TabButton = () => {
+//  return {
+//    view: (vnode) => {
+//
+//      const selectedClassStr = vnode.attrs.selected ? '.tab-btn--selected' : '';
+//
+//      return m('button.tab-btn' + selectedClassStr,
+//        {
+//          onclick: (e) => {
+//            vnode.attrs.onSelected();
+//          },
+//        },
+//        vnode.attrs.text,
+//      );
+//    },
+//  };
+//};
 
 export {
   Directory,
