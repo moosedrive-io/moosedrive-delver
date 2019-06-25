@@ -1,4 +1,5 @@
 import { DeleteButton, OpenExternalButton } from './buttons.js';
+import m from 'mithril';
 
 
 function Directory() {

@@ -1,3 +1,6 @@
+import m from 'mithril';
+
+
 function DeleteButton() {
   return {
     view: (vnode) => {

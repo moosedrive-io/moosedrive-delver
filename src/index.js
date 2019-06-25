@@ -2,6 +2,7 @@ import { ClientBuilder } from 'remofs-client';
 import { decodeObject } from 'omnistreams';
 import { ChoiceButton } from './components/buttons.js';
 import { Directory } from './components/directory.js';
+import m from 'mithril';
 
 
 const State = {
