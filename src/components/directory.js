@@ -102,7 +102,16 @@ const Item = () => {
 
           if (type === 'file') {
 
-            if (mime.startsWith('image/')) {
+            if (mime.startsWith('text/') || mime === 'application/javascript') {
+              previewContent = m('.item__preview__text',
+                m(TextPreview,
+                  {
+                    url,
+                  },
+                ),
+              );
+            }
+            else if (mime.startsWith('image/')) {
               previewContent = m('.item__preview__image__container',
                 m('img.item__preview__image',
                   {
@@ -231,6 +240,31 @@ const Settings = () => {
 
       return m('.settings',
         content
+      );
+    },
+  };
+};
+
+
+const TextPreview = () => {
+
+  let text = "";
+
+  return {
+    oninit: async (vnode) => {
+      console.log(vnode.attrs.url);
+      const responseText = await m.request({
+        url: vnode.attrs.url,
+        withCredentials: true,
+        responseType: 'text',
+      });
+
+      text = responseText;
+    },
+
+    view: (vnode) => {
+      return m('textarea.text-preview',
+        text,
       );
     },
   };
