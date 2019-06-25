@@ -1,5 +1,6 @@
 import { DeleteButton, OpenExternalButton } from './buttons.js';
 import m from 'mithril';
+import { getType as getMime } from 'mime';
 
 
 function Directory() {
@@ -97,10 +98,22 @@ const Item = () => {
 
           let previewContent;
 
+          const mime = getMime(name);
+
           if (type === 'file') {
-            previewContent = m('div',
-              "file"
-            );
+
+            if (mime.startsWith('image/')) {
+              previewContent = m('.item__preview__image__container',
+                m('img.item__preview__image',
+                  {
+                    src: url,
+                  },
+                ),
+              );
+            }
+            else {
+              previewContent = "Hi there";
+            }
           }
           else {
             previewContent = m('.item__preview__content__directory',
