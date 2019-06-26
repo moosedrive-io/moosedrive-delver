@@ -133,6 +133,8 @@
 
 .item__preview__image__container {
   text-align: center;
+  background-color: #000000;
+  max-height: var(--preview-height);
 }
 .item__preview__image {
   max-width: 100%; 
