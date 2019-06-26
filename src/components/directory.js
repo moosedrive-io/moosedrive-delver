@@ -31,6 +31,9 @@ function Directory() {
               onDelete: () => {
                 vnode.attrs.onDeleteItem(key);
               },
+              addViewer: (path, viewerId) => {
+                vnode.attrs.addViewer([key].concat(path), viewerId);
+              },
               //ondownload: async () => {
 
               //  const path = '/' + State.curPath.concat([key]).join('/');
@@ -133,6 +136,9 @@ const Item = () => {
                   items: vnode.attrs.data.children,
                   clicked: (key) => {
                   },
+                  addViewer: (path, viewerId) => {
+                    vnode.attrs.addViewer(path, viewerId);
+                  },
                 },
               ),
             );
@@ -200,7 +206,11 @@ const Item = () => {
         m('.item__settings',
           m(Settings,
             {
+              item: vnode.attrs.data,
               selected: settingsSelected,
+              addViewer: (viewerId) => {
+                vnode.attrs.addViewer([], viewerId);
+              }
             },
           ),
         ),
@@ -223,7 +233,12 @@ const Settings = () => {
       switch (selected) {
         case 'permissions':
           content = m('.settings__permissions',
-            "Edit Permissions",
+            m(PermissionsEdit,
+              {
+                permissions: vnode.attrs.item.permissions,
+                addViewer: vnode.attrs.addViewer,
+              },
+            ),
           );
           break;
         case 'sharing':
@@ -265,6 +280,63 @@ const TextPreview = () => {
     view: (vnode) => {
       return m('textarea.text-preview',
         text,
+      );
+    },
+  };
+};
+
+
+const PermissionsEdit = () => {
+
+  let viewerText = "";
+
+  return {
+    view: (vnode) => {
+
+      const permissions = vnode.attrs.permissions ? vnode.attrs.permissions : {};
+      const viewers = permissions.viewers;
+      const editors = permissions.editors;
+
+      return m('.permissions-edit',
+        m('.permissions-edit__viewers-list',
+          "Viewers:",
+          viewers ?
+            viewers.map((viewer) => {
+              return m('.permissions-edit__viewers-list__viewer',
+                viewer
+              );
+            })
+          :
+          null,
+          m('div',
+            m('i.fas.fa-plus-circle',
+              {
+                onclick: (e) => {
+                  vnode.attrs.addViewer(viewerText);
+                },
+              }
+            ),
+            m('input',
+              {
+                type: 'text',
+                onkeyup: (e) => {
+                  viewerText = e.target.value;
+                },
+              },
+            ),
+          ),
+        ),
+        m('.permissions-edit__editors-list',
+          "Editors:",
+          editors ?
+            editors.map((editor) => {
+              return m('.permissions-edit__editors-list__editor',
+                "editor",
+              );
+            })
+          :
+          null
+        ),
       );
     },
   };

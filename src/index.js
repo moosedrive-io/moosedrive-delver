@@ -77,6 +77,10 @@ const Home = {
     });
   },
 
+  buildPathStr: (path) => {
+    return '/' + path.join('/');
+  },
+
   view: function() {
     if (!State.curDir) {
       return null;
@@ -130,6 +134,10 @@ const Home = {
                 catch (e) {
                   console.error("Failed to delete:", path, e);
                 }
+              },
+              addViewer: async (path, viewerId) => {
+                console.log("add it", path, viewerId);
+                State.client.addViewer(this.buildPathStr(path), viewerId);
               },
             }),
           ),
