@@ -162,18 +162,6 @@ const DirNav = () => {
               },
             }
           ),
-          //m('i.dirnav__btn.dirnav__back.fas.fa-arrow-left', {
-          //    onclick: () => {
-          //      vnode.attrs.onBack();
-          //    },
-          //  }
-          //),
-          //m('i.dirnav__btn.dirnav__forward.fas.fa-arrow-right', {
-          //    onclick: () => {
-          //      vnode.attrs.onForward();
-          //    },
-          //  }
-          //),
         ),
         m(BreadcrumbPath, { pathList }),
         m('span.pure-u.dirnav__btn.dirnav__upload',
@@ -273,109 +261,7 @@ const BreadcrumbPath = () => {
 };
 
 
-function Login() {
-
-  let email = "";
-
-  return {
-    view: function() {
-      return m('main',
-        m('h1', "Login"),
-        m('p', "Enter your email address to get an access key"),
-        m('input', {
-          type: 'text',
-          onkeyup: function(e) {
-            email = e.target.value;
-          },
-          //value: "tapitman11@gmail.com",
-        },
-        ),
-        m('button', {
-            onclick: function() {
-              console.log(email);
-
-              m.request({
-                url: State.remoAddr + '/login',
-                method: 'POST',
-                withCredentials: true,
-                data: {
-                  email,
-                },
-                deserialize: (data) => data,
-              })
-              .then(function(response) {
-                console.log(response);
-                m.route.set('/enterkey');
-              })
-              .catch((e) => {
-                console.error(e);
-              });
-            },
-          },
-          "Submit"
-        ),
-      );
-    }
-  }
-}
-
-const EnterKey = () => {
-
-  let key = "";
-
-  return {
-    view: (vnode) => {
-      return m('main',
-        m('h1', "Complete Login"),
-        m('p', "Check your email for a key and enter it here"),
-        m('input', {
-          type: 'text',
-          onchange: function(e) {
-            key = e.target.value;
-          },
-        },
-        ),
-        m('button', {
-            onclick: function() {
-              console.log(key);
-
-              m.request({
-                url: State.remoAddr + '/login',
-                method: 'POST',
-                withCredentials: true,
-                data: {
-                  key,
-                },
-                deserialize: (data) => data,
-              })
-              .then(function(response) {
-                console.log(response);
-                m.route.set('/home');
-              })
-              .catch((e) => {
-                console.error(e);
-              });
-            },
-          },
-          "Submit"
-        ),
-      );
-    },
-  };
-};
-
-const Data = {
-  view: function() {
-    return m('h1',
-      "Hi there data",
-    );
-  }
-};
-
 const root = document.getElementById('root');
 m.route(root, '/',{
   '/': Home,
-  '/login': Login,
-  '/enterkey': EnterKey,
-  '/data': Data,
 });
