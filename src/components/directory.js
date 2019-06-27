@@ -34,6 +34,9 @@ function Directory() {
               addViewer: (path, viewerId) => {
                 vnode.attrs.addViewer([key].concat(path), viewerId);
               },
+              setPublicView: (path, value) => {
+                vnode.attrs.setPublicView([key].concat(path), value);
+              },
               //ondownload: async () => {
 
               //  const path = '/' + State.curPath.concat([key]).join('/');
@@ -139,6 +142,9 @@ const Item = () => {
                   addViewer: (path, viewerId) => {
                     vnode.attrs.addViewer(path, viewerId);
                   },
+                  setPublicView: (path, value) => {
+                    vnode.attrs.setPublicView(path, value);
+                  },
                 },
               ),
             );
@@ -210,7 +216,10 @@ const Item = () => {
               selected: settingsSelected,
               addViewer: (viewerId) => {
                 vnode.attrs.addViewer([], viewerId);
-              }
+              },
+              setPublicView: (value) => {
+                vnode.attrs.setPublicView([], value);
+              },
             },
           ),
         ),
@@ -237,6 +246,7 @@ const Settings = () => {
               {
                 permissions: vnode.attrs.item.permissions,
                 addViewer: vnode.attrs.addViewer,
+                setPublicView: vnode.attrs.setPublicView,
               },
             ),
           );
@@ -298,6 +308,11 @@ const PermissionsEdit = () => {
       const editors = permissions.editors;
 
       return m('.permissions-edit',
+        m(PublicViewSelector,
+          {
+            setSelected: vnode.attrs.setPublicView,
+          }
+        ),
         m('.permissions-edit__viewers-list',
           "Viewers:",
           viewers ?
@@ -336,6 +351,25 @@ const PermissionsEdit = () => {
             })
           :
           null
+        ),
+      );
+    },
+  };
+};
+
+
+const PublicViewSelector = () => {
+  return {
+    view: (vnode) => {
+      return m('.public-view-selector',
+        "Public view?",
+        m('input.public-view-selector__checkbox',
+          {
+            type: 'checkbox',
+            onchange: (e) => {
+              vnode.attrs.setSelected(e.target.checked);
+            },
+          },
         ),
       );
     },
