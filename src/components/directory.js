@@ -310,6 +310,7 @@ const PermissionsEdit = () => {
       return m('.permissions-edit',
         m(PublicViewSelector,
           {
+            selected: permissions.publicView,
             setSelected: vnode.attrs.setPublicView,
           }
         ),
@@ -366,6 +367,7 @@ const PublicViewSelector = () => {
         m('input.public-view-selector__checkbox',
           {
             type: 'checkbox',
+            checked: vnode.attrs.selected,
             onchange: (e) => {
               vnode.attrs.setSelected(e.target.checked);
             },
