@@ -72,6 +72,7 @@ const Item = () => {
       const type = vnode.attrs.data.type;
       const path = vnode.attrs.path.concat([name]).join('/');
       const url = encodeURI(vnode.attrs.remoAddr + '/' + path);
+      const item = vnode.attrs.data;
 
       let icon;
       let openExternalButton = null;
@@ -172,6 +173,12 @@ const Item = () => {
           },
           m(icon),
           m('span.item__name', name),
+          m('span.item__public-icon',
+            item.permissions && item.permissions.publicView ?
+            m('i.fas.fa-eye')
+            :
+            null
+          ),
           m(DeleteButton,
             {
               onDelete: () => {
