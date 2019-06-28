@@ -29,7 +29,10 @@ const Home = {
       const producer = await State.client.getMetaStream('/');
 
       producer.onData((data) => {
-        producer.request(1);
+        // TODO: might need to tune this number. If it's too low and there are
+        // a lot of events the sending side can get an exception for trying to
+        // send more than requested.
+        producer.request(10);
 
         const update = decodeObject(data);
 
@@ -48,7 +51,9 @@ const Home = {
           console.log(curDir);
         }
 
-        if (update.meta === null) {
+        // TODO: checking for unauthorized here is a hack. Should at least use
+        // a code and probably do something cleaner in general.
+        if (update.meta === null || update.meta === 'unauthorized') {
           delete curDir.children[filename];
         }
         else {
