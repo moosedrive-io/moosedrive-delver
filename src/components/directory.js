@@ -34,8 +34,8 @@ function Directory() {
               addViewer: (path, viewerId) => {
                 vnode.attrs.addViewer([key].concat(path), viewerId);
               },
-              setPublicView: (path, value) => {
-                vnode.attrs.setPublicView([key].concat(path), value);
+              setPublicView: (path, value, recursive) => {
+                vnode.attrs.setPublicView([key].concat(path), value, recursive);
               },
               //ondownload: async () => {
 
@@ -142,8 +142,8 @@ const Item = () => {
                   addViewer: (path, viewerId) => {
                     vnode.attrs.addViewer(path, viewerId);
                   },
-                  setPublicView: (path, value) => {
-                    vnode.attrs.setPublicView(path, value);
+                  setPublicView: (path, value, recursive) => {
+                    vnode.attrs.setPublicView(path, value, recursive);
                   },
                 },
               ),
@@ -217,8 +217,8 @@ const Item = () => {
               addViewer: (viewerId) => {
                 vnode.attrs.addViewer([], viewerId);
               },
-              setPublicView: (value) => {
-                vnode.attrs.setPublicView([], value);
+              setPublicView: (value, recursive) => {
+                vnode.attrs.setPublicView([], value, recursive);
               },
             },
           ),
@@ -311,7 +311,9 @@ const PermissionsEdit = () => {
         m(PublicViewSelector,
           {
             selected: permissions.publicView,
-            setSelected: vnode.attrs.setPublicView,
+            setSelected: (value) => {
+              vnode.attrs.setPublicView(value, true);
+            },
           }
         ),
         m('.permissions-edit__viewers-list',

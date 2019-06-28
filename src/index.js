@@ -139,8 +139,8 @@ const Home = {
                 console.log("add it", path, viewerId);
                 State.client.addViewer(this.buildPathStr(path), viewerId);
               },
-              setPublicView: async (path, value) => {
-                State.client.setPublicView(this.buildPathStr(path), value);
+              setPublicView: async (path, value, recursive) => {
+                State.client.setPublicView(this.buildPathStr(path), value, recursive);
               },
             }),
           ),
