@@ -7,6 +7,7 @@ function DeleteButton() {
       return m(ChoiceButton,
         {
           iconClasses: '.fas.fa-times',
+          hoverText: "Delete",
           promptText: "Really delete?",
           option1Text: "Yes",
           onOption1: () => {
@@ -31,6 +32,7 @@ function ChoiceButton() {
       return m('span.btn.choice-btn',
         m('i' + vnode.attrs.iconClasses,
           { 
+            title: vnode.attrs.hoverText,
             onclick: (e) => {
               state = 'confirm';
               e.stopPropagation();

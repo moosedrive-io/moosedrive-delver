@@ -168,6 +168,9 @@ const DirNav = () => {
         ),
         m(BreadcrumbPath, { pathList }),
         m('span.pure-u.dirnav__btn.dirnav__upload',
+          {
+            title: "Upload",
+          },
           m(UploadButton,
             {
               onSelection: (e) => {

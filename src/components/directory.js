@@ -80,6 +80,7 @@ const Item = () => {
         icon = 'i.fas.fa-file';
         openExternalButton = m('.item__header__open-external-btn',
           {
+            title: "Open in tab",
             onclick: (e) => {
               e.stopPropagation();
             },
@@ -175,7 +176,11 @@ const Item = () => {
           m('span.item__name', name),
           m('span.item__public-icon',
             item.permissions && item.permissions.publicView ?
-            m('i.fas.fa-eye')
+            m('i.fas.fa-eye',
+              {
+                title: "Publicly visible",
+              }
+            )
             :
             null
           ),
@@ -188,6 +193,7 @@ const Item = () => {
           ),
           m('a.file',
             {
+              title: "Download",
               href: url + '?download=true',
               onclick: (e) => {
                 e.stopPropagation();
@@ -198,15 +204,17 @@ const Item = () => {
           ),
           m('span.item__permissions-btn',
             {
+              title: "Sharing is caring",
               onclick: (e) => {
                 e.stopPropagation();
                 settingsSelected = settingsSelected === 'permissions' ? null : 'permissions';
               },
             },
-            m('i.btn.item__btn.fas.fa-key'),
+            m('i.btn.item__btn.fas.fa-user-friends'),
           ),
           m('span.item__tags-btn',
             {
+              title: "Tags",
               onclick: (e) => {
                 e.stopPropagation();
                 settingsSelected = settingsSelected === 'tags' ? null : 'tags';
