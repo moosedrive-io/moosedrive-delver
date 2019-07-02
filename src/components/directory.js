@@ -2,6 +2,9 @@ import { DeleteButton, OpenExternalButton } from './buttons.js';
 import m from 'mithril';
 import { getType as getMime } from 'mime';
 
+import { fromObject } from 'rein-state';
+import h from 'hyperscript';
+
 
 function Directory() {
   // this is used to achieve a "natural sort". see
@@ -24,6 +27,7 @@ function Directory() {
               },
             },
             m(Item, {
+              state: vnode.attrs.state.children[key],
               path: vnode.attrs.path,
               remoAddr: vnode.attrs.remoAddr,
               name: key,
@@ -33,9 +37,6 @@ function Directory() {
               },
               addViewer: (path, viewerId) => {
                 vnode.attrs.addViewer([key].concat(path), viewerId);
-              },
-              setPublicView: (path, value, recursive) => {
-                vnode.attrs.setPublicView([key].concat(path), value, recursive);
               },
               //ondownload: async () => {
 
@@ -64,14 +65,26 @@ const Item = () => {
 
   let state = 'compact';
   let settingsSelected = null;
+  let path;
 
   return {
+
+    oncreate: (vnode) => {
+      vnode.dom.addEventListener('set-public-view', (e) => {
+        // modify the event in place
+        if (e.detail.path === undefined) {
+          e.detail.path = path;
+        }
+      });
+    },
+
     view: (vnode) => {
 
       const name = vnode.attrs.name;
       const type = vnode.attrs.data.type;
-      const path = vnode.attrs.path.concat([name]).join('/');
-      const url = encodeURI(vnode.attrs.remoAddr + '/' + path);
+      path = vnode.attrs.path.concat([name]);
+      const pathStr = path.join('/')
+      const url = encodeURI(vnode.attrs.remoAddr + '/' + pathStr);
       const item = vnode.attrs.data;
 
       let icon;
@@ -136,6 +149,7 @@ const Item = () => {
             previewContent = m('.item__preview__content__directory',
               m(Directory,
                 {
+                  state: vnode.attrs.state,
                   path: vnode.attrs.path.concat(name),
                   remoAddr: vnode.attrs.remoAddr,
                   items: vnode.attrs.data.children,
@@ -143,9 +157,6 @@ const Item = () => {
                   },
                   addViewer: (path, viewerId) => {
                     vnode.attrs.addViewer(path, viewerId);
-                  },
-                  setPublicView: (path, value, recursive) => {
-                    vnode.attrs.setPublicView(path, value, recursive);
                   },
                 },
               ),
@@ -227,13 +238,11 @@ const Item = () => {
         m('.item__settings',
           m(Settings,
             {
+              state: vnode.attrs.state.permissions,
               item: vnode.attrs.data,
               selected: settingsSelected,
               addViewer: (viewerId) => {
                 vnode.attrs.addViewer([], viewerId);
-              },
-              setPublicView: (value, recursive) => {
-                vnode.attrs.setPublicView([], value, recursive);
               },
             },
           ),
@@ -259,9 +268,9 @@ const Settings = () => {
           content = m('.settings__permissions',
             m(PermissionsEdit,
               {
+                state: vnode.attrs.state,
                 permissions: vnode.attrs.item.permissions,
                 addViewer: vnode.attrs.addViewer,
-                setPublicView: vnode.attrs.setPublicView,
               },
             ),
           );
@@ -316,6 +325,12 @@ const PermissionsEdit = () => {
   let viewerText = "";
 
   return {
+    oninit: (vnode) => {
+      console.log(vnode.attrs.state);
+      //vnode.attrs.state.publicView.onUpdate(() => {
+      //  console.log("es changy");
+      //});
+    },
     view: (vnode) => {
 
       const permissions = vnode.attrs.permissions ? vnode.attrs.permissions : {};
@@ -323,11 +338,17 @@ const PermissionsEdit = () => {
       const editors = permissions.editors;
 
       return m('.permissions-edit',
-        m(PublicViewSelector,
+        m(PublicViewSelectorAdapter,
           {
             selected: permissions.publicView,
             setSelected: (value) => {
-              vnode.attrs.setPublicView(value, true);
+              vnode.dom.dispatchEvent(new CustomEvent('set-public-view', {
+                bubbles: true,
+                detail: {
+                  value,
+                  recursive: true,
+                },
+              }));
             },
           }
         ),
@@ -375,25 +396,77 @@ const PermissionsEdit = () => {
   };
 };
 
+const PublicViewSelectorAdapter = () => {
 
-const PublicViewSelector = () => {
+  let selected;
+
   return {
-    view: (vnode) => {
-      return m('.public-view-selector',
-        "Public view?",
-        m('input.public-view-selector__checkbox',
-          {
-            type: 'checkbox',
-            checked: vnode.attrs.selected,
-            onchange: (e) => {
-              vnode.attrs.setSelected(e.target.checked);
-            },
-          },
-        ),
-      );
+
+    onbeforeupdate: (vnode) => {
+      selected.set(vnode.attrs.selected);
+      // mithril should ignore this component
+      return false;
     },
+
+    oncreate: (vnode) => {
+      selected = fromObject(vnode.attrs.selected);
+      vnode.dom.appendChild(PublicViewSelector(selected));
+
+      vnode.dom.addEventListener('selected', (e) => {
+        vnode.attrs.setSelected(e.detail.checked);
+      });
+    },
+
+    view: (vnode) => {
+      return m('.public-view-selector-adapter');
+    }
   };
+}
+
+const PublicViewSelector = (selected) => {
+
+  const dom = h('.public-view-selector',
+    "Public view?",
+    h('input.public-view-selector__checkbox',
+      {
+        type: 'checkbox',
+        checked: selected.get(),
+        onchange: (e) => {
+
+          //vnode.attrs.setSelected(e.target.checked);
+
+          dom.dispatchEvent(new CustomEvent('selected', {
+            bubbles: true,
+            detail: {
+              checked: e.target.checked,
+            },
+          }));
+        },
+      },
+    ),
+  );
+
+  return dom;
 };
+
+//const PublicViewSelector = () => {
+//  return {
+//    view: (vnode) => {
+//      return m('.public-view-selector',
+//        "Public view?",
+//        m('input.public-view-selector__checkbox',
+//          {
+//            type: 'checkbox',
+//            checked: vnode.attrs.selected,
+//            onchange: (e) => {
+//              vnode.attrs.setSelected(e.target.checked);
+//            },
+//          },
+//        ),
+//      );
+//    },
+//  };
+//};
 
 
 //const PreviewHeader = () => {

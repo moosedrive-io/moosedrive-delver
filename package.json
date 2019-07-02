@@ -10,6 +10,7 @@
   "author": "Anders Pitman",
   "license": "MIT",
   "dependencies": {
+    "hyperscript": "^2.0.2",
     "mime": "^2.4.4",
     "mithril": "^2.0.0-rc.6",
     "omnistreams": "^0.7.0",

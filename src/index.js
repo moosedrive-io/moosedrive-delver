@@ -3,6 +3,7 @@ import { decodeObject } from 'omnistreams';
 import { ChoiceButton } from './components/buttons.js';
 import { Directory } from './components/directory.js';
 import m from 'mithril';
+import { fromObject } from 'rein-state';
 
 
 const State = {
@@ -11,6 +12,8 @@ const State = {
   curPath: null,
   remoAddr: window.location.origin,
 };
+
+let reinstate;
 
 const Home = {
   oninit: function() {
@@ -79,16 +82,24 @@ const Home = {
       State.fs = res;
       State.curDir = res;
       State.curPath = [];
+
+      reinstate = fromObject(res);
     });
   },
 
-  buildPathStr: (path) => {
-    return '/' + path.join('/');
+
+
+  oncreate: (vnode) => {
+
+    vnode.dom.addEventListener('set-public-view', (e) => {
+      console.log('setpvpvpv', e.detail);
+      State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
+    });
   },
 
   view: function() {
     if (!State.curDir) {
-      return null;
+      return m('main');
     }
 
     return m('main',
@@ -114,6 +125,7 @@ const Home = {
           }),
           m('.main__directory',
             m(Directory, {
+              state: reinstate,
               path: State.curPath,
               remoAddr: State.remoAddr,
               items: State.curDir.children,
@@ -142,10 +154,7 @@ const Home = {
               },
               addViewer: async (path, viewerId) => {
                 console.log("add it", path, viewerId);
-                State.client.addViewer(this.buildPathStr(path), viewerId);
-              },
-              setPublicView: async (path, value, recursive) => {
-                State.client.setPublicView(this.buildPathStr(path), value, recursive);
+                State.client.addViewer(buildPathStr(path), viewerId);
               },
             }),
           ),
@@ -271,6 +280,10 @@ const BreadcrumbPath = () => {
   };
 };
 
+
+function buildPathStr(path) {
+  return '/' + path.join('/');
+}
 
 const root = document.getElementById('root');
 m.route(root, '/',{
