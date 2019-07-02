@@ -110,7 +110,7 @@ const Item = () => {
 
           if (type === 'file') {
 
-            if (mime.startsWith('text/') || mime === 'application/javascript') {
+            if (!mime || mime.startsWith('text/') || mime === 'application/javascript') {
               previewContent = m('.item__preview__text',
                 m(TextPreview,
                   {
