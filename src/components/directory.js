@@ -403,7 +403,7 @@ const PublicViewSelectorAdapter = () => {
   return {
 
     onbeforeupdate: (vnode) => {
-      state.selected.set(vnode.attrs.selected);
+      state.selected = vnode.attrs.selected;
       // mithril should ignore this component
       return false;
     },
@@ -427,7 +427,7 @@ const PublicViewSelector = (state) => {
 
   const s = h('span.s', 
     {
-      style: `display: ${state.selected.get() ? 'inline' : 'none'};`,
+      style: `display: ${state.selected ? 'inline' : 'none'};`,
     },
     "S"
   );
@@ -437,7 +437,7 @@ const PublicViewSelector = (state) => {
     h('input.public-view-selector__checkbox',
       {
         type: 'checkbox',
-        checked: state.selected.get(),
+        checked: state.selected,
         onchange: (e) => {
 
           //vnode.attrs.setSelected(e.target.checked);
