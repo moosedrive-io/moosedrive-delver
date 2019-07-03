@@ -2,7 +2,7 @@ import { DeleteButton, OpenExternalButton } from './buttons.js';
 import m from 'mithril';
 import { getType as getMime } from 'mime';
 
-import { fromObject } from 'rein-state';
+import rein from 'rein-state';
 import h from 'hyperscript';
 
 
@@ -398,19 +398,19 @@ const PermissionsEdit = () => {
 
 const PublicViewSelectorAdapter = () => {
 
-  let selected;
+  let state;
 
   return {
 
     onbeforeupdate: (vnode) => {
-      selected.set(vnode.attrs.selected);
+      state.selected.set(vnode.attrs.selected);
       // mithril should ignore this component
       return false;
     },
 
     oncreate: (vnode) => {
-      selected = fromObject(vnode.attrs.selected);
-      vnode.dom.appendChild(PublicViewSelector(selected));
+      state = rein.fromObject({ selected: vnode.attrs.selected });
+      vnode.dom.appendChild(PublicViewSelector(state));
 
       vnode.dom.addEventListener('selected', (e) => {
         vnode.attrs.setSelected(e.detail.checked);
@@ -423,14 +423,21 @@ const PublicViewSelectorAdapter = () => {
   };
 }
 
-const PublicViewSelector = (selected) => {
+const PublicViewSelector = (state) => {
+
+  const s = h('span.s', 
+    {
+      style: `display: ${state.selected.get() ? 'inline' : 'none'};`,
+    },
+    "S"
+  );
 
   const dom = h('.public-view-selector',
     "Public view?",
     h('input.public-view-selector__checkbox',
       {
         type: 'checkbox',
-        checked: selected.get(),
+        checked: state.selected.get(),
         onchange: (e) => {
 
           //vnode.attrs.setSelected(e.target.checked);
@@ -444,7 +451,12 @@ const PublicViewSelector = (selected) => {
         },
       },
     ),
+    s,
   );
+
+  rein.onUpdated(state, 'selected', (val) => {
+    s.style.display = val ? 'inline' : 'none';
+  });
 
   return dom;
 };

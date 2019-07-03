@@ -3,7 +3,7 @@ import { decodeObject } from 'omnistreams';
 import { ChoiceButton } from './components/buttons.js';
 import { Directory } from './components/directory.js';
 import m from 'mithril';
-import { fromObject } from 'rein-state';
+import rein from 'rein-state';
 
 
 const State = {
@@ -83,7 +83,7 @@ const Home = {
       State.curDir = res;
       State.curPath = [];
 
-      reinstate = fromObject(res);
+      reinstate = rein.fromObject(res);
     });
   },
 
