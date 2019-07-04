@@ -481,59 +481,6 @@ const PublicViewSelector = (state) => {
 //};
 
 
-//const PreviewHeader = () => {
-//
-//  let selected = 'preview';
-//
-//  return {
-//    view: (vnode) => {
-//      return m('.preview-header',
-//        m('span.preview-header__preview-btn',
-//          m(TabButton,
-//            {
-//              text: 'Preview',
-//              selected: selected === 'preview',
-//              onSelected: () => {
-//                selected = 'preview';
-//              },
-//            },
-//          ),
-//        ),
-//        m('span.preview-header__sharing-btn',
-//          m(TabButton,
-//            {
-//              text: 'Sharing',
-//              selected: selected === 'sharing',
-//              onSelected: () => {
-//                selected = 'sharing';
-//              },
-//            },
-//          ),
-//        ),
-//      );
-//    },
-//  };
-//};
-//
-//
-//const TabButton = () => {
-//  return {
-//    view: (vnode) => {
-//
-//      const selectedClassStr = vnode.attrs.selected ? '.tab-btn--selected' : '';
-//
-//      return m('button.tab-btn' + selectedClassStr,
-//        {
-//          onclick: (e) => {
-//            vnode.attrs.onSelected();
-//          },
-//        },
-//        vnode.attrs.text,
-//      );
-//    },
-//  };
-//};
-
 export {
   Directory,
 };
