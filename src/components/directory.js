@@ -1,9 +1,8 @@
-import { DeleteButton, OpenExternalButton } from './buttons.js';
 import m from 'mithril';
-import { getType as getMime } from 'mime';
-
 import rein from 'rein-state';
-import h from 'hyperscript';
+import { DeleteButton, OpenExternalButton } from './buttons.js';
+import { ItemSettings } from './item_settings.js';
+import { getType as getMime } from 'mime';
 
 
 function Directory() {
@@ -244,7 +243,7 @@ const Item = () => {
           openExternalButton,
         ),
         m('.item__settings',
-          m(SettingsAdapter,
+          m(ItemSettingsAdapter,
             {
               data: vnode.attrs.state,
               renderState: renderState.settings,
@@ -255,91 +254,6 @@ const Item = () => {
       );
     },
   };
-};
-
-
-const SettingsAdapter = () => {
-  return {
-    onbeforeupdate: (vnode) => {
-      // mithril should ignore this component
-      return false;
-    },
-
-    oncreate: (vnode) => {
-      vnode.dom.appendChild(Settings(vnode.attrs.data, vnode.attrs.renderState));
-    },
-
-    view: (vnode) => {
-      return m('.settings-adapter');
-    }
-  };
-};
-
-const Settings = (data, renderState) => {
-
-  const domCache = {
-    perm: null,
-    sharing: null,
-    tags: null,
-  };
-
-  const dummyContent = h('span');
-  let content = dummyContent;
-
-  const dom = h('.settings',
-    content,
-  );
-
-  rein.onUpdated(renderState, 'selected', () => {
-
-    switch (renderState.selected) {
-      case 'permissions':
-
-        if (!domCache.perm) {
-          domCache.perm = h('.settings__permissions',
-            data.permissions ?
-              PermissionsEdit(data.permissions)
-              :
-              null,
-          );
-        }
-
-        dom.replaceChild(domCache.perm, content);
-        content = domCache.perm;
-        break;
-
-      case 'sharing':
-
-        if (!domCache.sharing) {
-          domCache.sharing = h('.settings__sharing',
-            "Edit Sharing",
-          );
-        }
-
-        dom.replaceChild(domCache.sharing, content);
-        content = domCache.sharing;
-        break;
-
-      case 'tags':
-
-        if (!domCache.tags) {
-          domCache.tags = h('.settings__tags',
-            "Edit Tags",
-          );
-        }
-
-        dom.replaceChild(domCache.tags, content);
-        content = domCache.tags
-        break;
-
-      default:
-        dom.replaceChild(dummyContent, content);
-        content = dummyContent;
-        break;
-    }
-  });
-
-  return dom;
 };
 
 
@@ -368,128 +282,21 @@ const TextPreview = () => {
 };
 
 
-const PermissionsEdit = (state) => {
-
-  let viewerText = "";
-
-  const viewers = state.viewers;
-  const editors = state.editors;
-
-  function Viewer(state) {
-    return h('.permissions-edit__viewers-list__viewer',
-      state 
-    );
-  }
-
-  const viewersDom = h('.permissions-edit__viewers-list__viewers',
-    viewers ? viewers.map((viewer) => {
-      return Viewer(viewer);
-    }) : null,
-  );
-
-  if (viewers) {
-    rein.onPush(viewers, (val) => {
-      viewersDom.appendChild(Viewer(val));
-    });
-  }
-
-  const dom = h('.permissions-edit',
-    PublicViewSelector(state),
-    h('.permissions-edit__viewers-list',
-      "Viewers:",
-      viewersDom,
-      h('div',
-        h('i.fas.fa-plus-circle',
-          {
-            onclick: (e) => {
-              dom.dispatchEvent(new CustomEvent('add-viewer', {
-                bubbles: true,
-                detail: {
-                  viewerId: viewerText,
-                },
-              }));
-            },
-          }
-        ),
-        h('input',
-          {
-            type: 'text',
-            onkeyup: (e) => {
-              viewerText = e.target.value;
-            },
-          },
-        ),
-      ),
-    ),
-    h('.permissions-edit__editors-list',
-      "Editors:",
-      editors ?
-        editors.map((editor) => {
-          return h('.permissions-edit__editors-list__editor',
-            "editor",
-          );
-        })
-      :
-      null
-    ),
-  );
-
-
-  dom.addEventListener('selected', (e) => {
-
-    e.stopPropagation();
-
-    const detail = {
-      value: e.detail.checked,
-      recursive: true,
-    };
-
-    dom.dispatchEvent(new CustomEvent('set-public-view', {
-      bubbles: true,
-      detail,
-    }));
-  });
-
-  return dom;
-};
-
-
-const PublicViewSelector = (state) => {
-
-  console.log("PublicViewSelector state", state);
-
-  const s = h('span.s', 
-    {
-      style: `display: ${state.publicView ? 'inline' : 'none'};`,
+const ItemSettingsAdapter = () => {
+  return {
+    onbeforeupdate: (vnode) => {
+      // mithril should ignore this component
+      return false;
     },
-    "S"
-  );
 
-  const dom = h('.public-view-selector',
-    "Public view?",
-    h('input.public-view-selector__checkbox',
-      {
-        type: 'checkbox',
-        checked: state.publicView,
-        onchange: (e) => {
+    oncreate: (vnode) => {
+      vnode.dom.appendChild(ItemSettings(vnode.attrs.data, vnode.attrs.renderState));
+    },
 
-          dom.dispatchEvent(new CustomEvent('selected', {
-            bubbles: true,
-            detail: {
-              checked: e.target.checked,
-            },
-          }));
-        },
-      },
-    ),
-    s,
-  );
-
-  rein.onUpdated(state, 'publicView', () => {
-    s.style.display = state.publicView ? 'inline' : 'none';
-  });
-
-  return dom;
+    view: (vnode) => {
+      return m('.item-settings-adapter');
+    }
+  };
 };
 
 
