@@ -92,8 +92,13 @@ const Home = {
   oncreate: (vnode) => {
 
     vnode.dom.addEventListener('set-public-view', (e) => {
-      console.log('setpvpvpv', e.detail);
       State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
+    });
+
+    vnode.dom.addEventListener('add-viewer', (e) => {
+      console.log('add-viewer-event', e.detail);
+      State.client.addViewer(buildPathStr(e.detail.path), e.detail.viewerId);
+      //State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
     });
   },
 
@@ -151,10 +156,6 @@ const Home = {
                 catch (e) {
                   console.error("Failed to delete:", path, e);
                 }
-              },
-              addViewer: async (path, viewerId) => {
-                console.log("add it", path, viewerId);
-                State.client.addViewer(buildPathStr(path), viewerId);
               },
             }),
           ),

@@ -27,6 +27,7 @@ function Directory() {
               },
             },
             m(Item, {
+              key,
               state: vnode.attrs.state.children[key],
               path: vnode.attrs.path,
               remoAddr: vnode.attrs.remoAddr,
@@ -34,9 +35,6 @@ function Directory() {
               data: vnode.attrs.items[key],
               onDelete: () => {
                 vnode.attrs.onDeleteItem(key);
-              },
-              addViewer: (path, viewerId) => {
-                vnode.attrs.addViewer([key].concat(path), viewerId);
               },
               //ondownload: async () => {
 
@@ -72,6 +70,12 @@ const Item = () => {
     oncreate: (vnode) => {
       vnode.dom.addEventListener('set-public-view', (e) => {
         // modify the event in place
+        if (e.detail.path === undefined) {
+          e.detail.path = path;
+        }
+      });
+
+      vnode.dom.addEventListener('add-viewer', (e) => {
         if (e.detail.path === undefined) {
           e.detail.path = path;
         }
@@ -154,9 +158,6 @@ const Item = () => {
                   remoAddr: vnode.attrs.remoAddr,
                   items: vnode.attrs.data.children,
                   clicked: (key) => {
-                  },
-                  addViewer: (path, viewerId) => {
-                    vnode.attrs.addViewer(path, viewerId);
                   },
                 },
               ),
@@ -241,9 +242,6 @@ const Item = () => {
               state: vnode.attrs.state.permissions,
               item: vnode.attrs.data,
               selected: settingsSelected,
-              addViewer: (viewerId) => {
-                vnode.attrs.addViewer([], viewerId);
-              },
             },
           ),
         ),
@@ -270,7 +268,6 @@ const Settings = () => {
               {
                 state: vnode.attrs.state,
                 permissions: vnode.attrs.item.permissions,
-                addViewer: vnode.attrs.addViewer,
               },
             ),
           );
@@ -366,7 +363,12 @@ const PermissionsEdit = () => {
             m('i.fas.fa-plus-circle',
               {
                 onclick: (e) => {
-                  vnode.attrs.addViewer(viewerText);
+                  vnode.dom.dispatchEvent(new CustomEvent('add-viewer', {
+                    bubbles: true,
+                    detail: {
+                      viewerId: viewerText,
+                    },
+                  }));
                 },
               }
             ),
