@@ -264,12 +264,15 @@ const Settings = () => {
       switch (selected) {
         case 'permissions':
           content = m('.settings__permissions',
-            m(PermissionsEditAdapter,
-              {
-                state: vnode.attrs.state,
-                permissions: vnode.attrs.item.permissions,
-              },
-            ),
+            vnode.attrs.item.permissions ?
+              m(PermissionsEditAdapter,
+                {
+                  state: vnode.attrs.state,
+                  permissions: vnode.attrs.item.permissions,
+                },
+              )
+            :
+            null,
           );
           break;
         case 'sharing':
@@ -355,9 +358,11 @@ const PermissionsEdit = (state) => {
     }) : null,
   );
 
-  rein.onPush(viewers, (val) => {
-    viewersDom.appendChild(Viewer(val));
-  });
+  if (viewers) {
+    rein.onPush(viewers, (val) => {
+      viewersDom.appendChild(Viewer(val));
+    });
+  }
 
   const dom = h('.permissions-edit',
     PublicViewSelector(permissions),
