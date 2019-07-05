@@ -35,18 +35,6 @@ function Directory() {
               onDelete: () => {
                 vnode.attrs.onDeleteItem(key);
               },
-              //ondownload: async () => {
-
-              //  const path = '/' + State.curPath.concat([key]).join('/');
-              //  const { result, producer } = await State.client.download(path);
-
-              //  producer.onData((data) => {
-              //    console.log("DATA", data.length);
-              //    producer.request(1);
-              //  });
-
-              //  producer.request(10);
-              //},
             }),
           ),
         );
