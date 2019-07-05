@@ -65,6 +65,12 @@ const Item = () => {
   let settingsSelected = null;
   let path;
 
+  const renderState = rein.fromObject({
+    settings: {
+      selected: false,
+    },
+  });
+
   return {
 
     oncreate: (vnode) => {
@@ -220,6 +226,7 @@ const Item = () => {
               onclick: (e) => {
                 e.stopPropagation();
                 settingsSelected = settingsSelected === 'permissions' ? null : 'permissions';
+                renderState.settings.selected = renderState.settings.selected === 'permissions' ? null : 'permissions';
               },
             },
             m('i.btn.item__btn.fas.fa-user-friends'),
@@ -229,7 +236,7 @@ const Item = () => {
               title: "Tags",
               onclick: (e) => {
                 e.stopPropagation();
-                settingsSelected = settingsSelected === 'tags' ? null : 'tags';
+                renderState.settings.selected = renderState.settings.selected === 'tags' ? null : 'tags';
               },
             },
             m('i.btn.item__btn.fas.fa-tags'),
@@ -237,11 +244,10 @@ const Item = () => {
           openExternalButton,
         ),
         m('.item__settings',
-          m(Settings,
+          m(SettingsAdapter,
             {
-              state: vnode.attrs.state,
-              item: vnode.attrs.data,
-              selected: settingsSelected,
+              data: vnode.attrs.state,
+              renderState: renderState.settings,
             },
           ),
         ),
@@ -252,46 +258,88 @@ const Item = () => {
 };
 
 
-const Settings = () => {
-
+const SettingsAdapter = () => {
   return {
-    view : (vnode) => {
+    onbeforeupdate: (vnode) => {
+      // mithril should ignore this component
+      return false;
+    },
 
-      const selected = vnode.attrs.selected;
+    oncreate: (vnode) => {
+      vnode.dom.appendChild(Settings(vnode.attrs.data, vnode.attrs.renderState));
+    },
 
-      let content = null;
+    view: (vnode) => {
+      return m('.settings-adapter');
+    }
+  };
+};
 
-      switch (selected) {
-        case 'permissions':
-          content = m('.settings__permissions',
-            vnode.attrs.item.permissions ?
-              m(PermissionsEditAdapter,
-                {
-                  state: vnode.attrs.state,
-                  permissions: vnode.attrs.item.permissions,
-                },
-              )
-            :
-            null,
+const Settings = (data, renderState) => {
+
+  const domCache = {
+    perm: null,
+    sharing: null,
+    tags: null,
+  };
+
+  const dummyContent = h('span');
+  let content = dummyContent;
+
+  const dom = h('.settings',
+    content,
+  );
+
+  rein.onUpdated(renderState, 'selected', () => {
+
+    switch (renderState.selected) {
+      case 'permissions':
+
+        if (!domCache.perm) {
+          domCache.perm = h('.settings__permissions',
+            data.permissions ?
+              PermissionsEdit(data.permissions)
+              :
+              null,
           );
-          break;
-        case 'sharing':
-          content = m('.settings__sharing',
+        }
+
+        dom.replaceChild(domCache.perm, content);
+        content = domCache.perm;
+        break;
+
+      case 'sharing':
+
+        if (!domCache.sharing) {
+          domCache.sharing = h('.settings__sharing',
             "Edit Sharing",
           );
-          break;
-        case 'tags':
-          content = m('.settings__tags',
+        }
+
+        dom.replaceChild(domCache.sharing, content);
+        content = domCache.sharing;
+        break;
+
+      case 'tags':
+
+        if (!domCache.tags) {
+          domCache.tags = h('.settings__tags',
             "Edit Tags",
           );
-          break;
-      }
+        }
 
-      return m('.settings',
-        content
-      );
-    },
-  };
+        dom.replaceChild(domCache.tags, content);
+        content = domCache.tags
+        break;
+
+      default:
+        dom.replaceChild(dummyContent, content);
+        content = dummyContent;
+        break;
+    }
+  });
+
+  return dom;
 };
 
 
@@ -320,31 +368,12 @@ const TextPreview = () => {
 };
 
 
-const PermissionsEditAdapter = () => {
-  return {
-
-    onbeforeupdate: (vnode) => {
-      // mithril should ignore this component
-      return false;
-    },
-
-    oncreate: (vnode) => {
-      vnode.dom.appendChild(PermissionsEdit(vnode.attrs.state));
-    },
-
-    view: (vnode) => {
-      return m('.public-view-selector-adapter');
-    }
-  };
-};
-
 const PermissionsEdit = (state) => {
 
   let viewerText = "";
 
-  const permissions = state.permissions;
-  const viewers = state.permissions.viewers;
-  const editors = state.permissions.editors;
+  const viewers = state.viewers;
+  const editors = state.editors;
 
   function Viewer(state) {
     return h('.permissions-edit__viewers-list__viewer',
@@ -365,7 +394,7 @@ const PermissionsEdit = (state) => {
   }
 
   const dom = h('.permissions-edit',
-    PublicViewSelector(permissions),
+    PublicViewSelector(state),
     h('.permissions-edit__viewers-list',
       "Viewers:",
       viewersDom,
@@ -427,6 +456,8 @@ const PermissionsEdit = (state) => {
 
 const PublicViewSelector = (state) => {
 
+  console.log("PublicViewSelector state", state);
+
   const s = h('span.s', 
     {
       style: `display: ${state.publicView ? 'inline' : 'none'};`,
@@ -454,8 +485,8 @@ const PublicViewSelector = (state) => {
     s,
   );
 
-  rein.onUpdated(state, 'publicView', (val) => {
-    s.style.display = val ? 'inline' : 'none';
+  rein.onUpdated(state, 'publicView', () => {
+    s.style.display = state.publicView ? 'inline' : 'none';
   });
 
   return dom;
