@@ -239,7 +239,7 @@ const Item = () => {
         m('.item__settings',
           m(Settings,
             {
-              state: vnode.attrs.state.permissions,
+              state: vnode.attrs.state,
               item: vnode.attrs.data,
               selected: settingsSelected,
             },
@@ -264,7 +264,7 @@ const Settings = () => {
       switch (selected) {
         case 'permissions':
           content = m('.settings__permissions',
-            m(PermissionsEdit,
+            m(PermissionsEditAdapter,
               {
                 state: vnode.attrs.state,
                 permissions: vnode.attrs.item.permissions,
@@ -317,124 +317,114 @@ const TextPreview = () => {
 };
 
 
-const PermissionsEdit = () => {
-
-  let viewerText = "";
-
-  return {
-    oninit: (vnode) => {
-      console.log(vnode.attrs.state);
-      //vnode.attrs.state.publicView.onUpdate(() => {
-      //  console.log("es changy");
-      //});
-    },
-
-    oncreate: (vnode) => {
-      vnode.dom.addEventListener('selected', (e) => {
-
-        e.stopPropagation();
-
-        const detail = {
-          value: e.detail.checked,
-          recursive: true,
-        };
-
-        vnode.dom.dispatchEvent(new CustomEvent('set-public-view', {
-          bubbles: true,
-          detail,
-        }));
-      });
-    },
-
-    view: (vnode) => {
-
-      const permissions = vnode.attrs.permissions ? vnode.attrs.permissions : {};
-      const viewers = permissions.viewers;
-      const editors = permissions.editors;
-
-      return m('.permissions-edit',
-        m(PublicViewSelectorAdapter,
-          {
-            selected: permissions.publicView,
-          }
-        ),
-        m('.permissions-edit__viewers-list',
-          "Viewers:",
-          viewers ?
-            viewers.map((viewer) => {
-              return m('.permissions-edit__viewers-list__viewer',
-                viewer
-              );
-            })
-          :
-          null,
-          m('div',
-            m('i.fas.fa-plus-circle',
-              {
-                onclick: (e) => {
-                  vnode.dom.dispatchEvent(new CustomEvent('add-viewer', {
-                    bubbles: true,
-                    detail: {
-                      viewerId: viewerText,
-                    },
-                  }));
-                },
-              }
-            ),
-            m('input',
-              {
-                type: 'text',
-                onkeyup: (e) => {
-                  viewerText = e.target.value;
-                },
-              },
-            ),
-          ),
-        ),
-        m('.permissions-edit__editors-list',
-          "Editors:",
-          editors ?
-            editors.map((editor) => {
-              return m('.permissions-edit__editors-list__editor',
-                "editor",
-              );
-            })
-          :
-          null
-        ),
-      );
-    },
-  };
-};
-
-const PublicViewSelectorAdapter = () => {
-
-  let state;
-
+const PermissionsEditAdapter = () => {
   return {
 
     onbeforeupdate: (vnode) => {
-      state.selected = vnode.attrs.selected;
       // mithril should ignore this component
       return false;
     },
 
     oncreate: (vnode) => {
-      state = rein.fromObject({ selected: vnode.attrs.selected });
-      vnode.dom.appendChild(PublicViewSelector(state));
+      vnode.dom.appendChild(PermissionsEdit(vnode.attrs.state));
     },
 
     view: (vnode) => {
       return m('.public-view-selector-adapter');
     }
   };
-}
+};
+
+const PermissionsEdit = (state) => {
+
+  let viewerText = "";
+
+  const permissions = state.permissions;
+  const viewers = state.permissions.viewers;
+  const editors = state.permissions.editors;
+
+  function Viewer(state) {
+    return h('.permissions-edit__viewers-list__viewer',
+      state 
+    );
+  }
+
+  const viewersDom = h('.permissions-edit__viewers-list__viewers',
+    viewers ? viewers.map((viewer) => {
+      return Viewer(viewer);
+    }) : null,
+  );
+
+  rein.onPush(viewers, (val) => {
+    viewersDom.appendChild(Viewer(val));
+  });
+
+  const dom = h('.permissions-edit',
+    PublicViewSelector(permissions),
+    h('.permissions-edit__viewers-list',
+      "Viewers:",
+      viewersDom,
+      h('div',
+        h('i.fas.fa-plus-circle',
+          {
+            onclick: (e) => {
+              dom.dispatchEvent(new CustomEvent('add-viewer', {
+                bubbles: true,
+                detail: {
+                  viewerId: viewerText,
+                },
+              }));
+            },
+          }
+        ),
+        h('input',
+          {
+            type: 'text',
+            onkeyup: (e) => {
+              viewerText = e.target.value;
+            },
+          },
+        ),
+      ),
+    ),
+    h('.permissions-edit__editors-list',
+      "Editors:",
+      editors ?
+        editors.map((editor) => {
+          return h('.permissions-edit__editors-list__editor',
+            "editor",
+          );
+        })
+      :
+      null
+    ),
+  );
+
+
+  dom.addEventListener('selected', (e) => {
+
+    e.stopPropagation();
+
+    const detail = {
+      value: e.detail.checked,
+      recursive: true,
+    };
+
+    dom.dispatchEvent(new CustomEvent('set-public-view', {
+      bubbles: true,
+      detail,
+    }));
+  });
+
+  return dom;
+};
+
 
 const PublicViewSelector = (state) => {
 
   const s = h('span.s', 
     {
-      style: `display: ${state.selected ? 'inline' : 'none'};`,
+      style: `display: ${state.publicView ? 'inline' : 'none'};`,
     },
     "S"
   );
@@ -444,7 +434,7 @@ const PublicViewSelector = (state) => {
     h('input.public-view-selector__checkbox',
       {
         type: 'checkbox',
-        checked: state.selected,
+        checked: state.publicView,
         onchange: (e) => {
 
           dom.dispatchEvent(new CustomEvent('selected', {
@@ -459,31 +449,12 @@ const PublicViewSelector = (state) => {
     s,
   );
 
-  rein.onUpdated(state, 'selected', (val) => {
+  rein.onUpdated(state, 'publicView', (val) => {
     s.style.display = val ? 'inline' : 'none';
   });
 
   return dom;
 };
-
-//const PublicViewSelector = () => {
-//  return {
-//    view: (vnode) => {
-//      return m('.public-view-selector',
-//        "Public view?",
-//        m('input.public-view-selector__checkbox',
-//          {
-//            type: 'checkbox',
-//            checked: vnode.attrs.selected,
-//            onchange: (e) => {
-//              vnode.attrs.setSelected(e.target.checked);
-//            },
-//          },
-//        ),
-//      );
-//    },
-//  };
-//};
 
 
 export {

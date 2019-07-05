@@ -29,6 +29,8 @@ const Home = {
         .secure(false)
         .build();
 
+      reinstate = await State.client.getReinstate();
+
       const producer = await State.client.getMetaStream('/');
 
       producer.onData((data) => {
@@ -82,8 +84,6 @@ const Home = {
       State.fs = res;
       State.curDir = res;
       State.curPath = [];
-
-      reinstate = rein.fromObject(res);
     });
   },
 
@@ -130,7 +130,7 @@ const Home = {
           }),
           m('.main__directory',
             m(Directory, {
-              state: reinstate,
+              state: reinstate.root,
               path: State.curPath,
               remoAddr: State.remoAddr,
               items: State.curDir.children,
