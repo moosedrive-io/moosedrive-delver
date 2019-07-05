@@ -328,6 +328,24 @@ const PermissionsEdit = () => {
       //  console.log("es changy");
       //});
     },
+
+    oncreate: (vnode) => {
+      vnode.dom.addEventListener('selected', (e) => {
+
+        e.stopPropagation();
+
+        const detail = {
+          value: e.detail.checked,
+          recursive: true,
+        };
+
+        vnode.dom.dispatchEvent(new CustomEvent('set-public-view', {
+          bubbles: true,
+          detail,
+        }));
+      });
+    },
+
     view: (vnode) => {
 
       const permissions = vnode.attrs.permissions ? vnode.attrs.permissions : {};
@@ -338,15 +356,6 @@ const PermissionsEdit = () => {
         m(PublicViewSelectorAdapter,
           {
             selected: permissions.publicView,
-            setSelected: (value) => {
-              vnode.dom.dispatchEvent(new CustomEvent('set-public-view', {
-                bubbles: true,
-                detail: {
-                  value,
-                  recursive: true,
-                },
-              }));
-            },
           }
         ),
         m('.permissions-edit__viewers-list',
@@ -413,10 +422,6 @@ const PublicViewSelectorAdapter = () => {
     oncreate: (vnode) => {
       state = rein.fromObject({ selected: vnode.attrs.selected });
       vnode.dom.appendChild(PublicViewSelector(state));
-
-      vnode.dom.addEventListener('selected', (e) => {
-        vnode.attrs.setSelected(e.detail.checked);
-      });
     },
 
     view: (vnode) => {
@@ -441,8 +446,6 @@ const PublicViewSelector = (state) => {
         type: 'checkbox',
         checked: state.selected,
         onchange: (e) => {
-
-          //vnode.attrs.setSelected(e.target.checked);
 
           dom.dispatchEvent(new CustomEvent('selected', {
             bubbles: true,
