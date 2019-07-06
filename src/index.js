@@ -1,7 +1,7 @@
 import { ClientBuilder } from 'remofs-client';
 import { decodeObject } from 'omnistreams';
 import { ChoiceButton } from './components/buttons.js';
-import { Directory } from './components/directory.js';
+import { DirectoryAdapter } from './components/directory.js';
 import m from 'mithril';
 import rein from 'rein-state';
 
@@ -9,161 +9,163 @@ import rein from 'rein-state';
 const State = {
   fs: null,
   curDir: null,
-  curPath: null,
+  curPath: [],
   remoAddr: window.location.origin,
 };
 
 let reinstate;
 
-const Home = {
-  oninit: function() {
+const Home = () => {
 
-    console.log(State);
+  const appState = rein.fromObject({
+    path: State.curPath,
+    remoAddr: State.remoAddr,
+  });
+  
+  return {
+    oninit: function() {
 
-    // TODO: do proper cookie parsing
-    const key = document.cookie.split('=')[1];
+      console.log(State);
 
-    (async () => {
-      State.client = await new ClientBuilder()
-        .authKey(key)
-        .secure(false)
-        .build();
+      // TODO: do proper cookie parsing
+      const key = document.cookie.split('=')[1];
 
-      reinstate = await State.client.getReinstate();
+      (async () => {
+        State.client = await new ClientBuilder()
+          .authKey(key)
+          .secure(false)
+          .build();
 
-      const producer = await State.client.getMetaStream('/');
+        reinstate = await State.client.getReinstate();
 
-      producer.onData((data) => {
-        // TODO: might need to tune this number. If it's too low and there are
-        // a lot of events the sending side can get an exception for trying to
-        // send more than requested.
-        producer.request(10);
+        State.client.onReinUpdate(() => {
+          m.redraw();
+        });
 
-        const update = decodeObject(data);
+        const producer = await State.client.getMetaStream('/');
 
-        console.log("meta update");
-        console.log(update);
+        producer.onData((data) => {
+          // TODO: might need to tune this number. If it's too low and there are
+          // a lot of events the sending side can get an exception for trying to
+          // send more than requested.
+          producer.request(10);
 
-        const path = update.path.split('/').slice(1);
-        console.log(path);
+          const update = decodeObject(data);
 
-        const filename = path[path.length - 1];
+          console.log("meta update");
+          console.log(update);
 
-        let curDir = State.fs;
+          const path = update.path.split('/').slice(1);
+          console.log(path);
 
-        for (const next of path.slice(0, path.length - 1)) {
-          curDir = curDir.children[next];
-          console.log(curDir);
+          const filename = path[path.length - 1];
+
+          let curDir = State.fs;
+
+          for (const next of path.slice(0, path.length - 1)) {
+            curDir = curDir.children[next];
+            console.log(curDir);
+          }
+
+          // TODO: checking for unauthorized here is a hack. Should at least use
+          // a code and probably do something cleaner in general.
+          if (update.meta === null || update.meta === 'unauthorized') {
+            delete curDir.children[filename];
+          }
+          else {
+            curDir.children[filename] = update.meta;
+          }
+
+          m.redraw();
+        });
+
+        producer.request(1);
+      })();
+
+      m.request({
+        url: State.remoAddr + '?ignoreIndex=true',
+        withCredentials: true,
+      })
+      .then(function(res) {
+        if (res === null) {
+          m.route.set('/login');
         }
 
-        // TODO: checking for unauthorized here is a hack. Should at least use
-        // a code and probably do something cleaner in general.
-        if (update.meta === null || update.meta === 'unauthorized') {
-          delete curDir.children[filename];
-        }
-        else {
-          curDir.children[filename] = update.meta;
-        }
+        console.log(res);
+        State.fs = res;
+        State.curDir = res;
+        State.curPath = [];
+      });
+    },
 
-        m.redraw();
+
+
+    oncreate: (vnode) => {
+
+      vnode.dom.addEventListener('set-public-view', (e) => {
+        State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
       });
 
-      producer.request(1);
-    })();
+      vnode.dom.addEventListener('add-viewer', (e) => {
+        console.log('add-viewer-event', e.detail);
+        State.client.addViewer(buildPathStr(e.detail.path), e.detail.viewerId);
+        //State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
+      });
 
-    m.request({
-      url: State.remoAddr + '?ignoreIndex=true',
-      withCredentials: true,
-    })
-    .then(function(res) {
-      if (res === null) {
-        m.route.set('/login');
+      vnode.dom.addEventListener('delete-item', async (e) => {
+
+        const path = '/' + e.detail.path.join('/');
+
+        try {
+          const result = await State.client.delete(path);
+        }
+        catch (e) {
+          console.error("Failed to delete:", path, e);
+        }
+      });
+    },
+
+    view: function() {
+      if (!State.curDir) {
+        return m('main');
       }
 
-      console.log(res);
-      State.fs = res;
-      State.curDir = res;
-      State.curPath = [];
-    });
-  },
+      return m('main',
+        m('.pure-g',
+          m('.left-panel.pure-u-1-4'),
+          m('.center-panel.pure-u-1-2',
+            m(DirNav, {
+              pathList: State.curPath,
+              onUp: () => {
+                State.curPath.pop();
+                State.curDir = State.fs;
 
-
-
-  oncreate: (vnode) => {
-
-    vnode.dom.addEventListener('set-public-view', (e) => {
-      State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
-    });
-
-    vnode.dom.addEventListener('add-viewer', (e) => {
-      console.log('add-viewer-event', e.detail);
-      State.client.addViewer(buildPathStr(e.detail.path), e.detail.viewerId);
-      //State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
-    });
-  },
-
-  view: function() {
-    if (!State.curDir) {
-      return m('main');
-    }
-
-    return m('main',
-      m('.pure-g',
-        m('.left-panel.pure-u-1-4'),
-        m('.center-panel.pure-u-1-2',
-          m(DirNav, {
-            pathList: State.curPath,
-            onUp: () => {
-              State.curPath.pop();
-              State.curDir = State.fs;
-
-              for (const part of State.curPath) {
-                State.curDir = State.curDir.children[part];
-              }
-            },
-            onBack: () => {
-              console.log("back");
-            },
-            onForward: () => {
-              console.log("forward");
-            },
-          }),
-          m('.main__directory',
-            m(Directory, {
-              state: reinstate.root,
-              path: State.curPath,
-              remoAddr: State.remoAddr,
-              items: State.curDir.children,
-              clicked: (key) => {
-                console.log(State.curDir);
-                //const target = State.curDir.children[key];
-                //if (target.type === 'dir') {
-                //  State.curPath.push(key);
-                //  State.curDir = target;
-                //}
+                for (const part of State.curPath) {
+                  State.curDir = State.curDir.children[part];
+                }
               },
-              onDeleteItem: async (key) => {
-                console.log("delete", key);
-                const target = State.curDir.children[key];
-                const path = '/' + (State.curPath.length === 0 ?
-                  key :
-                  State.curPath.join('/') + '/' + key);
-                console.log(path, target);
-                try {
-                  const result = await State.client.delete(path);
-                  console.log(result);
-                }
-                catch (e) {
-                  console.error("Failed to delete:", path, e);
-                }
+              onBack: () => {
+                console.log("back");
+              },
+              onForward: () => {
+                console.log("forward");
               },
             }),
+            m('.main__directory',
+              m(DirectoryAdapter,
+                {
+                  path: [],
+                  data: reinstate.root.children,
+                  appState,
+                },
+              ),
+            ),
           ),
+          m('.right-panel.pure-u-1-4'),
         ),
-        m('.right-panel.pure-u-1-4'),
-      ),
-    );
-  }
+      );
+    }
+  };
 };
 
 const DirNav = () => {

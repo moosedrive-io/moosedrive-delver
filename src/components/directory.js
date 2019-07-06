@@ -1,50 +1,121 @@
 import m from 'mithril';
+import h from 'hyperscript';
 import rein from 'rein-state';
 import { DeleteButton, OpenExternalButton } from './buttons.js';
 import { ItemSettings } from './item_settings.js';
 import { getType as getMime } from 'mime';
 
 
-function Directory() {
+const DirectoryAdapter = () => {
+
+  return {
+    onbeforeupdate: (vnode) => {
+      // mithril should ignore this component
+      return false;
+    },
+
+    oncreate: (vnode) => {
+      vnode.dom.appendChild(ReinDirectory(vnode.attrs.path, vnode.attrs.data, vnode.attrs.appState));
+    },
+
+    view: (vnode) => {
+      return m('.directory-adapter');
+    }
+  };
+};
+
+
+const ReinDirectory = (path, data, renderState) => {
   // this is used to achieve a "natural sort". see
   // https://stackoverflow.com/a/38641281/943814
-  const sorter = new Intl.Collator(undefined, {
+  const naturalSorter = new Intl.Collator(undefined, {
     numeric: true,
     sensitivity: 'base'
   });
 
-  return {
-    view: (vnode) => m('.directory',
-      m('.directory__header',
-        '/' + vnode.attrs.path.join('/'),
-      ),
-      Object.keys(vnode.attrs.items).sort(sorter.compare).map((key) => {
-        return m('.pure-g',
-          m('.pure-u-1', {
-              onclick: () => {
-                vnode.attrs.clicked(key);
-              },
-            },
-            m(Item, {
-              key,
-              state: vnode.attrs.state.children[key],
-              path: vnode.attrs.path,
-              remoAddr: vnode.attrs.remoAddr,
-              name: key,
-              data: vnode.attrs.items[key],
-              onDelete: () => {
-                vnode.attrs.onDeleteItem(key);
-              },
-            }),
-          ),
-        );
-      }),
-      m('.directory__spacer',
-        //'/' + vnode.attrs.path.join('/'),
-      ),
+  let sortedNames = Object.keys(data).sort(naturalSorter.compare);
+
+  //const Item = (name) => {
+  //  return h('.item', name);
+  //};
+
+  const itemsElem = h('.directory__items',
+    sortedNames.map((name) => {
+      return ItemMithrilAdapter(path.concat([name]), data[name], renderState);
+    }),
+  );
+
+  const dom = h('.directory',
+    h('.directory__header',
+      '/' + path.join('/'),
     ),
-  };
-}
+    itemsElem,
+    h('.directory__spacer',
+      //'/' + vnode.attrs.path.join('/'),
+    ),
+  );
+
+  rein.onAdd(data, (name) => {
+
+    // TODO: could do a binary insertion to be more efficient, rather than
+    // resorting the whole list
+    sortedNames = Object.keys(data).sort(naturalSorter.compare);
+
+    const index = sortedNames.indexOf(name);
+
+    if (index > -1) {
+      itemsElem.insertBefore(ItemMithrilAdapter(path.concat([name]), data[name], renderState), itemsElem.childNodes[index]);
+    }
+    else {
+      throw new Error("Directory DOM insert fail");
+    }
+  });
+
+  rein.onDelete(data, (name) => {
+
+    const index = sortedNames.indexOf(name);
+    itemsElem.childNodes[index].remove();
+  });
+
+  return dom;
+};
+
+
+const ItemMithrilAdapter = (path, data, appState) => {
+
+  const dom = h('.item-mithril-adapter');
+
+  const name = path[path.length - 1];
+
+  function Wrapper() {
+    return {
+      view: (vnode) => {
+        return m(Item,
+          {
+            state: data,
+            appState,
+            path,
+            remoAddr: appState.remoAddr,
+            name,
+            data,
+            onDelete: () => {
+              dom.dispatchEvent(new CustomEvent('delete-item', {
+                bubbles: true,
+                detail: {
+                  path,
+                },
+              }));
+            },
+          }
+        )
+      },
+    };
+  }
+
+  m.mount(dom, Wrapper);
+
+  return dom;
+};
 
 const Item = () => {
 
@@ -79,7 +150,7 @@ const Item = () => {
 
       const name = vnode.attrs.name;
       const type = vnode.attrs.data.type;
-      path = vnode.attrs.path.concat([name]);
+      path = vnode.attrs.path;
       const pathStr = path.join('/')
       const url = encodeURI(vnode.attrs.remoAddr + '/' + pathStr);
       const item = vnode.attrs.data;
@@ -144,14 +215,11 @@ const Item = () => {
           }
           else {
             previewContent = m('.item__preview__content__directory',
-              m(Directory,
+              m(DirectoryAdapter,
                 {
-                  state: vnode.attrs.state,
-                  path: vnode.attrs.path.concat(name),
-                  remoAddr: vnode.attrs.remoAddr,
-                  items: vnode.attrs.data.children,
-                  clicked: (key) => {
-                  },
+                  path: vnode.attrs.path,
+                  data: vnode.attrs.state.children,
+                  appState: vnode.attrs.appState,
                 },
               ),
             );
@@ -251,7 +319,6 @@ const TextPreview = () => {
 
   return {
     oninit: async (vnode) => {
-      console.log(vnode.attrs.url);
       const responseText = await m.request({
         url: vnode.attrs.url,
         withCredentials: true,
@@ -289,5 +356,5 @@ const ItemSettingsAdapter = () => {
 
 
 export {
-  Directory,
+  DirectoryAdapter,
 };
