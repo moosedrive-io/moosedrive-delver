@@ -7,10 +7,6 @@ import rein from 'rein-state';
 
 
 const State = {
-  fs: null,
-  curDir: null,
-  curPath: [],
-  remoAddr: window.location.origin,
 };
 
 let reinstate;
@@ -18,14 +14,12 @@ let reinstate;
 const Home = () => {
 
   const appState = rein.fromObject({
-    path: State.curPath,
-    remoAddr: State.remoAddr,
+    path: [],
+    remoAddr: window.location.origin,
   });
   
   return {
     oninit: function() {
-
-      console.log(State);
 
       // TODO: do proper cookie parsing
       const key = document.cookie.split('=')[1];
@@ -41,64 +35,8 @@ const Home = () => {
         State.client.onReinUpdate(() => {
           m.redraw();
         });
-
-        const producer = await State.client.getMetaStream('/');
-
-        producer.onData((data) => {
-          // TODO: might need to tune this number. If it's too low and there are
-          // a lot of events the sending side can get an exception for trying to
-          // send more than requested.
-          producer.request(10);
-
-          const update = decodeObject(data);
-
-          console.log("meta update");
-          console.log(update);
-
-          const path = update.path.split('/').slice(1);
-          console.log(path);
-
-          const filename = path[path.length - 1];
-
-          let curDir = State.fs;
-
-          for (const next of path.slice(0, path.length - 1)) {
-            curDir = curDir.children[next];
-            console.log(curDir);
-          }
-
-          // TODO: checking for unauthorized here is a hack. Should at least use
-          // a code and probably do something cleaner in general.
-          if (update.meta === null || update.meta === 'unauthorized') {
-            delete curDir.children[filename];
-          }
-          else {
-            curDir.children[filename] = update.meta;
-          }
-
-          m.redraw();
-        });
-
-        producer.request(1);
       })();
-
-      m.request({
-        url: State.remoAddr + '?ignoreIndex=true',
-        withCredentials: true,
-      })
-      .then(function(res) {
-        if (res === null) {
-          m.route.set('/login');
-        }
-
-        console.log(res);
-        State.fs = res;
-        State.curDir = res;
-        State.curPath = [];
-      });
     },
-
-
 
     oncreate: (vnode) => {
 
@@ -126,7 +64,8 @@ const Home = () => {
     },
 
     view: function() {
-      if (!State.curDir) {
+
+      if (!reinstate) {
         return m('main');
       }
 
@@ -135,20 +74,12 @@ const Home = () => {
           m('.left-panel.pure-u-1-4'),
           m('.center-panel.pure-u-1-2',
             m(DirNav, {
-              pathList: State.curPath,
+              pathList: [],
               onUp: () => {
-                State.curPath.pop();
-                State.curDir = State.fs;
-
-                for (const part of State.curPath) {
-                  State.curDir = State.curDir.children[part];
-                }
               },
               onBack: () => {
-                console.log("back");
               },
               onForward: () => {
-                console.log("forward");
               },
             }),
             m('.main__directory',
@@ -191,16 +122,9 @@ const DirNav = () => {
           m(UploadButton,
             {
               onSelection: (e) => {
-                const file = e.target.files[0];
-                console.log(file);
 
-                let path;
-                if (State.curPath.length === 0) {
-                  path = '/' + file.name
-                }
-                else {
-                  path = '/' + State.curPath.join('/') + '/' + file.name
-                }
+                const file = e.target.files[0];
+                const path = '/' + file.name;
 
                 State.client.uploadFile(path, file);
               },
