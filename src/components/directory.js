@@ -74,6 +74,7 @@ const ReinDirectory = (path, data, renderState) => {
   rein.onDelete(data, (name) => {
 
     const index = sortedNames.indexOf(name);
+    sortedNames.splice(index, 1);
     itemsElem.removeChild(itemsElem.childNodes[index]);
   });
 
