@@ -161,35 +161,47 @@ const PublicViewSelector = (state) => {
   console.log("PublicViewSelector state", state);
 
   const s = h('span.s', 
-    {
-      style: `display: ${state.publicView ? 'inline' : 'none'};`,
-    },
     "S"
+  );
+
+  const checkbox = h('input.public-view-selector__checkbox',
+    {
+      type: 'checkbox',
+      onchange: (e) => {
+
+        dom.dispatchEvent(new CustomEvent('selected', {
+          bubbles: true,
+          detail: {
+            checked: e.target.checked,
+          },
+        }));
+      },
+    },
   );
 
   const dom = h('.public-view-selector',
     "Public view?",
-    h('input.public-view-selector__checkbox',
-      {
-        type: 'checkbox',
-        checked: state.publicView,
-        onchange: (e) => {
-
-          dom.dispatchEvent(new CustomEvent('selected', {
-            bubbles: true,
-            detail: {
-              checked: e.target.checked,
-            },
-          }));
-        },
-      },
-    ),
+    checkbox,
     s,
   );
 
+  updatePublicView();
+
+
   rein.onUpdated(state, 'publicView', () => {
-    s.style.display = state.publicView ? 'inline' : 'none';
+    updatePublicView();
   });
+
+  function updatePublicView() {
+    if (state.publicView) {
+      s.style.display = 'inline';
+      checkbox.checked = true;
+    }
+    else {
+      s.style.display = 'none';
+      checkbox.checked = false;
+    }
+  }
 
   return dom;
 };
