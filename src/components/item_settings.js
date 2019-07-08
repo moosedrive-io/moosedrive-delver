@@ -24,10 +24,7 @@ const ItemSettings = (data, renderState) => {
 
         if (!domCache.perm) {
           domCache.perm = h('.item-settings__permissions',
-            data.permissions ?
-              PermissionsEdit(data.permissions)
-              :
-              null,
+            PermissionsEdit(data.permissions)
           );
         }
 
@@ -74,8 +71,8 @@ const PermissionsEdit = (state) => {
 
   let viewerText = "";
 
-  const viewers = state.viewers;
-  const editors = state.editors;
+  const viewers = state && state.viewers ? state.viewers : [];
+  const editors = state && state.editors ? state.editors : [];
 
   function Viewer(state) {
     return h('.permissions-edit__viewers-list__viewer',
@@ -84,9 +81,9 @@ const PermissionsEdit = (state) => {
   }
 
   const viewersDom = h('.permissions-edit__viewers-list__viewers',
-    viewers ? viewers.map((viewer) => {
+    viewers.map((viewer) => {
       return Viewer(viewer);
-    }) : null,
+    }),
   );
 
   if (viewers) {
@@ -125,14 +122,11 @@ const PermissionsEdit = (state) => {
     ),
     h('.permissions-edit__editors-list',
       "Editors:",
-      editors ?
-        editors.map((editor) => {
-          return h('.permissions-edit__editors-list__editor',
-            "editor",
-          );
-        })
-      :
-      null
+      editors.map((editor) => {
+        return h('.permissions-edit__editors-list__editor',
+          "editor",
+        );
+      }),
     ),
   );
 
