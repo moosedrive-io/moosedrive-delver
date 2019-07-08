@@ -70,9 +70,8 @@ const Home = () => {
       }
 
       return m('main',
-        m('.pure-g',
-          m('.left-panel.pure-u-1-4'),
-          m('.center-panel.pure-u-1-2',
+        m('.main',
+          m('.main__dirnav',
             m(DirNav, {
               pathList: [],
               onUp: () => {
@@ -82,17 +81,16 @@ const Home = () => {
               onForward: () => {
               },
             }),
-            m('.main__directory',
-              m(DirectoryAdapter,
-                {
-                  path: [],
-                  data: reinstate.root.children,
-                  appState,
-                },
-              ),
+          ),
+          m('.main__directory',
+            m(DirectoryAdapter,
+              {
+                path: [],
+                data: reinstate.root.children,
+                appState,
+              },
             ),
           ),
-          m('.right-panel.pure-u-1-4'),
         ),
       );
     }
@@ -105,8 +103,8 @@ const DirNav = () => {
 
       const pathList = vnode.attrs.pathList;
 
-      return m('.dirnav.pure-g',
-        m('span.pure-u',
+      return m('.dirnav',
+        m('span',
           m('i.dirnav__btn.dirnav__up.fas.fa-arrow-up', {
               onclick: () => {
                 vnode.attrs.onUp();
@@ -115,7 +113,7 @@ const DirNav = () => {
           ),
         ),
         m(BreadcrumbPath, { pathList }),
-        m('span.pure-u.dirnav__btn.dirnav__upload',
+        m('span.dirnav__btn.dirnav__upload',
           {
             title: "Upload",
           },
@@ -198,10 +196,10 @@ function UploadButton() {
 
 const BreadcrumbPath = () => {
   return {
-    view: (vnode) => m('span.breadcrumb-path.pure-u',
-      m('span.pure-u', '/'),
+    view: (vnode) => m('span.breadcrumb-path',
+      m('span', '/'),
       vnode.attrs.pathList.map((elem) => {
-        return m('span.pure-u', elem + '/');
+        return m('span', elem + '/');
       }),
     ),
   };

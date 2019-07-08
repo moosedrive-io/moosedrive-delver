@@ -2,18 +2,26 @@
   --text-color: #000000;
   --background-color: #ffffff;
   --preview-height: 300px;
+  --main-max-width: 960px;
 }
 
-.center-panel {
+.main {
+  max-width: var(--main-max-width);
+  margin: 0 auto;
+}
+
+
+.main__dirnav {
 }
 
 .dirnav {
   position: fixed;
   font-size: 22px;
   background-color: #ffffff;
-  width: 50%;
   border: 1px solid #000000;
   z-index: 1000;
+  width: 100%;
+  max-width: var(--main-max-width);
 }
 
 .dirnav__btn {
@@ -29,12 +37,11 @@
 }
 
 .dirnav__upload {
-  position: absolute;
-  right: 10px;
+  float: right;
 }
 
 .main__directory {
-  margin-top: 30px;
+  padding-top: 30px;
 }
 
 .directory {

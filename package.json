@@ -13,9 +13,9 @@
     "hyperscript": "^2.0.2",
     "mime": "^2.4.4",
     "mithril": "^2.0.0-rc.6",
+    "normalize.css": "^8.0.1",
     "omnistreams": "^0.7.0",
-    "omnistreams-filereader": "^0.5.0",
-    "purecss": "^1.0.0"
+    "omnistreams-filereader": "^0.5.0"
   },
   "devDependencies": {
     "webpack": "^4.33.0",
