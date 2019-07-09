@@ -105,8 +105,70 @@ function OpenExternalButton() {
   };
 }
 
+
+function UploadButton() {
+
+  let fileUploadElem;
+  let folderUploadElem;
+
+  return {
+    oncreate: (vnode) => {
+      fileUploadElem = vnode.dom.querySelector('#file-input');
+      fileUploadElem.addEventListener('change', (e) => {
+        vnode.attrs.onSelection(e);
+      });
+
+      folderUploadElem = vnode.dom.querySelector('#folder-input');
+      folderUploadElem.addEventListener('change', (e) => {
+        console.log(e);
+        //vnode.attrs.onSelection(e);
+      });
+    },
+    view: (vnode) => {
+      return m('span.upload-btn',
+        m('input.#file-input.upload-btn__input',
+          {
+            type: 'file',
+            multiple: true,
+          }
+        ),
+        m('input.#folder-input.upload-btn__input',
+          {
+            type: 'file',
+            // TODO: which of the following 3 are actually necessary? It seems
+            // to at least need webkitdirectory and mozdirectory in Firefox
+            directory: true,
+            webkitdirectory: true,
+            mozdirectory: true,
+          }
+        ),
+        m(ChoiceButton,
+          {
+            iconClasses: '.fas.fa-cloud-upload-alt',
+            promptText: "Upload:",
+            option1Text: "Folder",
+            option2Text: "File(s)",
+            onOption1: () => {
+              console.log("folder");
+              folderUploadElem.click();
+            },
+            onOption2: () => {
+              console.log("files");
+              fileUploadElem.click();
+            },
+            onCancel: () => {
+            },
+          }
+        ),
+      );
+    },
+  };
+}
+
+
 export {
   ChoiceButton,
   DeleteButton,
   OpenExternalButton,
+  UploadButton,
 };
