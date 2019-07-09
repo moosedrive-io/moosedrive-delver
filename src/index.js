@@ -61,6 +61,12 @@ const Home = () => {
           console.error("Failed to delete:", path, e);
         }
       });
+
+      vnode.dom.addEventListener('upload-file', (e) => {
+        const path = [...e.detail.path, e.detail.file.name];
+        const pathStr = encodePath(path);
+        State.client.uploadFile(pathStr, e.detail.file);
+      });
     },
 
     view: function() {
@@ -149,6 +155,11 @@ const BreadcrumbPath = () => {
 
 function buildPathStr(path) {
   return '/' + path.join('/');
+}
+
+
+function encodePath(path) {
+  return path.length === 1 ? '/' + path[0] : '/' + path.join('/');
 }
 
 const root = document.getElementById('root');

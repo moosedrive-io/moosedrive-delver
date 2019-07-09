@@ -1,7 +1,7 @@
 import m from 'mithril';
 import h from 'hyperscript';
 import rein from 'rein-state';
-import { DeleteButton, OpenExternalButton } from './buttons.js';
+import { DeleteButton, OpenExternalButton, UploadButton } from './buttons.js';
 import { ItemSettings } from './item_settings.js';
 import { getType as getMime } from 'mime';
 
@@ -158,6 +158,7 @@ const Item = () => {
 
       let icon;
       let openExternalButton = null;
+      let uploadButton = null;
       if (type === 'file') {
         icon = 'i.fas.fa-file';
         openExternalButton = m('.item__header__open-external-btn',
@@ -176,6 +177,23 @@ const Item = () => {
       }
       else {
         icon = 'i.fas.fa-folder';
+
+        uploadButton = m(UploadButton,
+          {
+            onSelection: (e) => {
+
+              const file = e.target.files[0];
+
+              vnode.dom.dispatchEvent(new CustomEvent('upload-file', {
+                bubbles: true,
+                detail: {
+                  path,
+                  file,
+                },
+              }));
+            },
+          }
+        );
       }
 
       let preview;
@@ -298,6 +316,7 @@ const Item = () => {
             m('i.btn.item__btn.fas.fa-tags'),
           ),
           openExternalButton,
+          uploadButton,
         ),
         m('.item__settings',
           m(ItemSettingsAdapter,
