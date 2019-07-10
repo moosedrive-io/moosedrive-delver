@@ -4,7 +4,7 @@ import m from 'mithril';
 function DeleteButton() {
   return {
     view: (vnode) => {
-      return m(ChoiceButton,
+      return m(MultiOptionChooser,
         {
           iconClasses: '.fas.fa-times',
           hoverText: "Delete",
@@ -23,13 +23,13 @@ function DeleteButton() {
   };
 }
 
-function ChoiceButton() {
+function MultiOptionChooser() {
 
   let state = 'unselected';
 
   return {
     view: (vnode) => {
-      return m('span.btn.choice-btn',
+      return m('span.btn.multi-option-chooser',
         m('i' + vnode.attrs.iconClasses,
           { 
             title: vnode.attrs.hoverText,
@@ -43,7 +43,7 @@ function ChoiceButton() {
         state === 'unselected' ?
         null
         :
-        m('span.choice-btn__confirm',
+        m('span.multi-option-chooser__confirm',
           {
             onclick: (e) => {
               e.stopPropagation();
@@ -51,21 +51,28 @@ function ChoiceButton() {
             }
           },
           vnode.attrs.promptText,
-          m('button.choice-btn__option1-btn',
+          m('button.multi-option-chooser__option1-btn',
             {
               onclick: (e) => {
                 vnode.attrs.onOption1();
                 state = 'unselected';
+
+                e.stopPropagation();
+                e.preventDefault();
               }
             },
             vnode.attrs.option1Text,
           ),
           vnode.attrs.option2Text ?
-            m('button.choice-btn__option2-btn',
+            m('button.multi-option-chooser__option2-btn',
               {
                 onclick: (e) => {
                   vnode.attrs.onOption2();
                   state = 'unselected';
+
+                  console.log("oh it clicked");
+                  e.stopPropagation();
+                  e.preventDefault();
                 }
               },
               vnode.attrs.option2Text
@@ -73,7 +80,7 @@ function ChoiceButton() {
           :
           null
           ,
-          m('button.choice-btn__cancel-btn',
+          m('button.multi-option-chooser__cancel-btn',
             {
               onclick: (e) => {
                 vnode.attrs.onCancel();
@@ -117,11 +124,17 @@ function UploadButton() {
       fileUploadElem.addEventListener('change', (e) => {
         vnode.attrs.onSelection(e);
       });
+      fileUploadElem.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
 
       folderUploadElem = vnode.dom.querySelector('#folder-input');
       folderUploadElem.addEventListener('change', (e) => {
         console.log(e);
         //vnode.attrs.onSelection(e);
+      });
+      folderUploadElem.addEventListener('click', (e) => {
+        e.stopPropagation();
       });
     },
     view: (vnode) => {
@@ -142,7 +155,7 @@ function UploadButton() {
             mozdirectory: true,
           }
         ),
-        m(ChoiceButton,
+        m(MultiOptionChooser,
           {
             iconClasses: '.fas.fa-cloud-upload-alt',
             promptText: "Upload:",
@@ -167,7 +180,7 @@ function UploadButton() {
 
 
 export {
-  ChoiceButton,
+  MultiOptionChooser,
   DeleteButton,
   OpenExternalButton,
   UploadButton,

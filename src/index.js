@@ -1,6 +1,6 @@
 import { ClientBuilder } from 'remofs-client';
 import { decodeObject } from 'omnistreams';
-import { ChoiceButton, UploadButton } from './components/buttons.js';
+import { UploadButton } from './components/buttons.js';
 import { DirectoryAdapter } from './components/directory.js';
 import m from 'mithril';
 import rein from 'rein-state';
@@ -27,6 +27,9 @@ const Home = () => {
       (async () => {
         State.client = await new ClientBuilder()
           .authKey(key)
+          //.port(443)
+          //.secure(true)
+          .port(9001)
           .secure(false)
           .build();
 
