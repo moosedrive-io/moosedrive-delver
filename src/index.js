@@ -24,13 +24,22 @@ const Home = () => {
       // TODO: do proper cookie parsing
       const key = document.cookie.split('=')[1];
 
+      let port;
+      let secure;
+      if (window.location.protocol === 'https:') {
+        port = 443;
+        secure = true;
+      }
+      else {
+        port = 9001;
+        secure = false;
+      }
+
       (async () => {
         State.client = await new ClientBuilder()
           .authKey(key)
-          //.port(443)
-          //.secure(true)
-          .port(9001)
-          .secure(false)
+          .port(port)
+          .secure(secure)
           .build();
 
         reinstate = await State.client.getReinstate();
