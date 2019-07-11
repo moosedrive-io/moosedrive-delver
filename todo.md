@@ -5,3 +5,4 @@
   since that's most likely to happen the most
 * Make navbar bigger
 * UploadButton preventDefault
+* Add login button
