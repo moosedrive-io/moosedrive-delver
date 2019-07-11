@@ -24,16 +24,15 @@ const Home = () => {
       // TODO: do proper cookie parsing
       const key = document.cookie.split('=')[1];
 
-      let port;
       let secure;
       if (window.location.protocol === 'https:') {
-        port = 443;
         secure = true;
       }
       else {
-        port = 9001;
         secure = false;
       }
+
+      const port = parseInt(window.location.port, 10);
 
       (async () => {
         State.client = await new ClientBuilder()
