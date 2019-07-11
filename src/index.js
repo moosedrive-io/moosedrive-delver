@@ -25,14 +25,15 @@ const Home = () => {
       const key = document.cookie.split('=')[1];
 
       let secure;
+      let port;
       if (window.location.protocol === 'https:') {
         secure = true;
+        port = 443;
       }
       else {
         secure = false;
+        port = 9001;
       }
-
-      const port = parseInt(window.location.port, 10);
 
       (async () => {
         State.client = await new ClientBuilder()
