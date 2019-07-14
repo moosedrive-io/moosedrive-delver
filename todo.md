@@ -6,3 +6,5 @@
 * Make navbar bigger
 * UploadButton preventDefault
 * Add login button
+* Make external links go to a delver page that renders different file types
+  like yaml and pdf, rather than relying on the browser's support.
