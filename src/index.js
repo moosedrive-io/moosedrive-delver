@@ -1,4 +1,4 @@
-import { ClientBuilder } from 'remofs-client';
+import { ClientBuilder } from 'remoose-client';
 import { decodeObject } from 'omnistreams';
 import { UploadButton } from './components/buttons.js';
 import { DirectoryAdapter } from './components/directory.js';
@@ -21,8 +21,9 @@ const Home = () => {
   return {
     oninit: function() {
 
-      // TODO: do proper cookie parsing
-      const key = document.cookie.split('=')[1];
+      const cookies = parseCookies();
+
+      const key = cookies.key;
 
       let secure;
       let port;
@@ -172,6 +173,18 @@ function buildPathStr(path) {
 
 function encodePath(path) {
   return path.length === 1 ? '/' + path[0] : '/' + path.join('/');
+}
+
+function parseCookies() {
+  const cookieMap = {};
+  document.cookie
+    .split(';')
+    .map(c => c.trim())
+    .map(c => c.split('='))
+    .forEach(c => {
+      cookieMap[c[0]] = c[1];
+    });
+  return cookieMap;
 }
 
 const root = document.getElementById('root');
