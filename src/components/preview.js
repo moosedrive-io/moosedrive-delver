@@ -20,10 +20,7 @@ const Preview = (state, type, name, url, vnode) => {
 
       if (type === 'file') {
 
-        if (mime === null) {
-          // no-op
-        }
-        else if (mime.startsWith('image/')) {
+        if (mime && mime.startsWith('image/')) {
           previewContent = m('.item__preview__image__container',
             m('img.item__preview__image',
               {
