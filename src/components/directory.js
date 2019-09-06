@@ -197,8 +197,6 @@ const Item = () => {
         );
       }
 
-      let preview = Preview(state, type, name, url, vnode);
-      
 
       return m('.item',
         m('.item__header',
@@ -269,7 +267,17 @@ const Item = () => {
             },
           ),
         ),
-        preview,
+        m(Preview,
+          {
+            state,
+            type,
+            name,
+            url,
+            path: vnode.attrs.path,
+            data: vnode.attrs.state.children,
+            appState: vnode.attrs.appState,
+          },
+        ),
       );
     },
   };

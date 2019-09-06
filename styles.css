@@ -130,9 +130,9 @@
   text-decoration: none;
 }
 
-.text-preview {
+.text-preview__textarea {
   font-family: Courier New;
-  font-size: 12px;
+  font-size: 14px;
   width: 100%;
   height: var(--preview-height);
   white-space: pre;

@@ -80,6 +80,13 @@ const Home = () => {
         const pathStr = encodePath(path);
         State.client.uploadFile(pathStr, e.detail.file);
       });
+
+      vnode.dom.addEventListener('upload-text-file', (e) => {
+        const path = e.detail.path;
+        const pathStr = encodePath(path);
+        //console.log(pathStr, e.detail.text);
+        State.client.storeTextFile(pathStr, e.detail.text);
+      });
     },
 
     view: function() {
