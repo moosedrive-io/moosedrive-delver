@@ -48,11 +48,11 @@ const ReinDirectory = (path, data, renderState) => {
   );
 
   const dom = h('.directory',
-    h('.directory__header',
+    h('.directory__separator',
       ">>> " + '/' + path.join('/'),
     ),
     itemsElem,
-    h('.directory__spacer',
+    h('.directory__separator',
       "<<< " + '/' + path.join('/'),
     ),
   );

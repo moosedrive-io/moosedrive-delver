@@ -47,16 +47,11 @@
 .directory {
 }
 
-.directory__header {
+.directory__separator{
+  font-size: 18px;
+  font-family: Courier New;
   color: #ffffff;
   font-weight: bold;
-  background-color: #000000;
-}
-
-.directory__spacer {
-  color: #ffffff;
-  font-weight: bold;
-  /*padding-bottom: 20px;*/
   background-color: #000000;
 }
 
