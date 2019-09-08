@@ -212,6 +212,16 @@ const Item = () => {
               onclick: (e) => {
                 e.stopPropagation();
               },
+              onchange: (e) => {
+                vnode.dom.dispatchEvent(new CustomEvent('item-check-changed', {
+                  bubbles: true,
+                  detail: {
+                    path,
+                    checked: e.target.checked,
+                    item,
+                  },
+                }));
+              },
             }),
           m(icon),
           m('span.item__name', name),

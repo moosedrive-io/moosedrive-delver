@@ -87,6 +87,13 @@ const Home = () => {
         //console.log(pathStr, e.detail.text);
         State.client.storeTextFile(pathStr, e.detail.text);
       });
+
+      vnode.dom.addEventListener('item-check-changed', (e) => {
+        const path = e.detail.path;
+        const pathStr = encodePath(path);
+        console.log(pathStr, "checked:", e.detail);
+        //State.client.storeTextFile(pathStr, e.detail.text);
+      });
     },
 
     view: function() {
