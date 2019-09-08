@@ -20,6 +20,7 @@ const DirectoryAdapter = () => {
     },
 
     view: (vnode) => {
+      console.log("render dir");
       return m('.directory-adapter');
     }
   };
@@ -48,11 +49,11 @@ const ReinDirectory = (path, data, renderState) => {
 
   const dom = h('.directory',
     h('.directory__header',
-      '/' + path.join('/'),
+      ">>> " + '/' + path.join('/'),
     ),
     itemsElem,
     h('.directory__spacer',
-      //'/' + vnode.attrs.path.join('/'),
+      "<<< " + '/' + path.join('/'),
     ),
   );
 
@@ -205,6 +206,13 @@ const Item = () => {
               state = state === 'compact' ? 'expanded' : 'compact';
             },
           },
+          m('input.item__checkbox', 
+            {
+              type: 'checkbox',
+              onclick: (e) => {
+                e.stopPropagation();
+              },
+            }),
           m(icon),
           m('span.item__name', name),
           m('span.item__public-icon',

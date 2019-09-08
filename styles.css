@@ -16,7 +16,7 @@
 
 .dirnav {
   position: fixed;
-  font-size: 22px;
+  font-size: 32px;
   background-color: #ffffff;
   border: 1px solid #000000;
   z-index: 1000;
@@ -41,7 +41,7 @@
 }
 
 .main__directory {
-  padding-top: 30px;
+  padding-top: 40px;
 }
 
 .directory {
@@ -56,7 +56,7 @@
 .directory__spacer {
   color: #ffffff;
   font-weight: bold;
-  padding-bottom: 20px;
+  /*padding-bottom: 20px;*/
   background-color: #000000;
 }
 
@@ -80,16 +80,23 @@
   padding-bottom: 5px;
 }
 .item__header:hover {
-  background-color: #c6dcff;
+  background-color: #bbbbbb;
 }
 .item__header__open-external-btn {
   float: right;
 }
 
+.item__checkbox {
+  margin-left: 10px;
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+}
+
 .item__name {
   margin-left: 10px;
   margin-right: 5px;
-  font-size: 14px;
+  font-size: 22px;
   /*font-weight: bold;*/
 }
 
@@ -132,7 +139,7 @@
 
 .text-preview__textarea {
   font-family: Courier New;
-  font-size: 14px;
+  font-size: 16px;
   width: 100%;
   height: var(--preview-height);
   white-space: pre;
