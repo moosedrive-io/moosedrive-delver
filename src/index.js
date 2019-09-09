@@ -101,6 +101,7 @@ const Home = () => {
       vnode.dom.addEventListener('upload-text-file', (e) => {
         const path = e.detail.path;
         const pathStr = encodePath(path);
+        console.log("do it", pathStr);
         //console.log(pathStr, e.detail.text);
         State.client.storeTextFile(pathStr, e.detail.text);
       });

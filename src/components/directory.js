@@ -1,9 +1,10 @@
 import m from 'mithril';
 import h from 'hyperscript';
 import rein from 'rein-state';
-import { OpenExternalButton, UploadButton } from './buttons.js';
+import { OpenExternalButton, UploadButton, IconButton } from './buttons.js';
 import { Preview } from './preview.js';
 import { ItemSettings } from './item_settings.js';
+import { TextFileEditor } from './text_editor.js';
 import { getType as getMime } from 'mime';
 
 
@@ -124,7 +125,7 @@ const ItemMithrilAdapter = (path, data, appState) => {
 
 const Item = () => {
 
-  let state = 'compact';
+  let state = 'minimized';
   let settingsSelected = null;
   let path;
 
@@ -147,6 +148,13 @@ const Item = () => {
       vnode.dom.addEventListener('add-viewer', (e) => {
         if (e.detail.path === undefined) {
           e.detail.path = path;
+        }
+      });
+
+      vnode.dom.addEventListener('upload-text-file', (e) => {
+        if (e.detail.path === undefined) {
+          e.detail.path = [...path, e.detail.filename];
+          console.log("set path", e.detail, path);
         }
       });
     },
@@ -205,7 +213,7 @@ const Item = () => {
         m('.item__header',
           { 
             onclick: (e) => {
-              state = state === 'compact' ? 'expanded' : 'compact';
+              state = state === 'minimized' ? 'expanded' : 'minimized';
             },
           },
           m('input.item__checkbox', 
@@ -280,6 +288,13 @@ const Item = () => {
             },
           ),
         ),
+        state === 'expanded' ? m(ItemControlsMithril,
+          {
+            item,
+          }
+        )
+        :
+        null,
         m(Preview,
           {
             state,
@@ -294,6 +309,57 @@ const Item = () => {
       );
     },
   };
+};
+
+const ItemControlsMithril = () => {
+  return {
+    onbeforeupdate: (vnode) => {
+      // mithril should ignore this component
+      return false;
+    },
+
+    oncreate: (vnode) => {
+      const itemControls = ItemControls(vnode.attrs.item);
+      vnode.dom.appendChild(itemControls);
+    },
+
+    view: (vnode) => {
+      return m('.item-controls-mithril');
+    }
+  };
+};
+
+
+const ItemControls = (item) => {
+  const dom = document.createElement('div');
+  dom.classList.add('item-controls');
+
+  let content = null;
+
+  if (item.type === 'dir') {
+    const addFileButton = IconButton(['fas', 'fa-plus']);
+    addFileButton.addEventListener('click', (e) => {
+      if (content === null) {
+        content = TextFileEditor({
+          initialText: "Hi there",
+        });
+        content.addEventListener('save', (e) => {
+          dom.dispatchEvent(new CustomEvent('upload-text-file', {
+            bubbles: true,
+            detail: e.detail,
+          }));
+        });
+        content.addEventListener('exit', (e) => {
+          dom.removeChild(content);
+          content = null;
+        });
+        dom.appendChild(content);
+      }
+    });
+    dom.appendChild(addFileButton);
+  }
+
+  return dom;
 };
 
 

@@ -123,6 +123,10 @@
   /*font-weight: bold;*/
 }
 
+.item-controls {
+  font-size: 32px;
+}
+
 .btn {
   padding-left: 2.5px;
   padding-right: 2.5px;
@@ -135,6 +139,7 @@
 .icon-button {
   padding-left: 5px;
   padding-right: 5px;
+  font-size: 32px;
 }
 .icon-button:hover {
   background-color: var(--hover-color);
@@ -174,6 +179,23 @@
 }
 
 .text-preview__textarea {
+  font-family: Courier New;
+  font-size: 16px;
+  width: 100%;
+  height: var(--preview-height);
+  white-space: pre;
+  resize: none;
+}
+
+.text-file-editor {
+  font-size: 18px;
+}
+
+.text-file-editor__header {
+  border: 1px solid #000000;
+}
+
+.text-editor__textarea {
   font-family: Courier New;
   font-size: 16px;
   width: 100%;

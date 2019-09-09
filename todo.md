@@ -7,3 +7,5 @@
 * Toggling visibility inverts icon regardless of actual state
 * When selecting a child folder, automatically deselect parent (to avoid
   accidentally deleting parent).
+* Make a custom SVG checkbox.
+* Use FileTextEditor for preview text editing

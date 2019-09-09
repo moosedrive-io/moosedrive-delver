@@ -25,7 +25,7 @@ const Preview = () => {
       let previewContent = null;
 
       switch (vnode.attrs.state) {
-        case 'compact':
+        case 'minimized':
           previewContent = null;
           break;
         case 'expanded': {

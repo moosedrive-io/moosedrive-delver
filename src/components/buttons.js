@@ -1,6 +1,13 @@
 import m from 'mithril';
 
 
+const TextButton = (text) => {
+  const button = document.createElement('button');
+  button.classList.add('text-button');
+  button.innerText = text;
+  return button;
+};
+
 const IconButton = (iconClasses) => {
   const dom = document.createElement('span');
   dom.classList.add('icon-button');
@@ -228,4 +235,6 @@ export {
   UploadButton,
   UploadButtonNew,
   NewFolderButton,
+  TextButton,
+  IconButton,
 };
