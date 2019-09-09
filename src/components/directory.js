@@ -59,6 +59,8 @@ const ReinDirectory = (path, data, renderState) => {
 
   rein.onAdd(data, (name) => {
 
+    console.log("rein add");
+
     // TODO: could do a binary insertion to be more efficient, rather than
     // resorting the whole list
     sortedNames = Object.keys(data).sort(naturalSorter.compare);

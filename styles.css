@@ -3,6 +3,8 @@
   --background-color: #ffffff;
   --preview-height: 300px;
   --main-max-width: 960px;
+  --control-bar-height: 40px;
+  --hover-color: #cccccc;
 }
 
 .main {
@@ -40,8 +42,29 @@
   float: right;
 }
 
+.control-bar {
+  position: fixed;
+  font-size: 32px;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  z-index: 1000;
+  width: 100%;
+  max-width: var(--main-max-width);
+  /*height: var(--control-bar-height);*/
+}
+
+.control-bar__buttons {
+  border: 1px solid #000000;
+  display: flex;
+  justify-content: right;
+}
+
+.control-bar__folder-name-input {
+  font-size: 20px;
+}
+
 .main__directory {
-  padding-top: 40px;
+  padding-top: var(--control-bar-height);
 }
 
 .directory {
@@ -84,8 +107,8 @@
 .item__checkbox {
   margin-left: 10px;
   margin-right: 10px;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
 }
 
 .item__name {
@@ -104,6 +127,14 @@
   background-color: #cccccc;
 }
 
+.icon-button {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.icon-button:hover {
+  background-color: var(--hover-color);
+}
+
 .item__btn {
   float: right;
 }
@@ -119,6 +150,11 @@
 
 .upload-btn__input {
   /*visibility: hidden;*/
+  display: none;
+  width: 0px;
+}
+
+.upload-button__input {
   display: none;
   width: 0px;
 }

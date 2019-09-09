@@ -179,9 +179,55 @@ function UploadButton() {
 }
 
 
+const UploadButtonNew = () => {
+  const dom = document.createElement('span');
+
+  const fileInput = document.createElement('input');
+  fileInput.classList.add('upload-button__input');
+  fileInput.setAttribute('type', 'file');
+  fileInput.setAttribute('multiple', true);
+  dom.appendChild(fileInput);
+
+  const folderInput = document.createElement('input');
+  folderInput.classList.add('upload-button__input');
+  folderInput.setAttribute('type', 'file');
+  folderInput.setAttribute('directory', true);
+  folderInput.setAttribute('webkitdirectory', true);
+  folderInput.setAttribute('mozdirectory', true);
+  dom.appendChild(folderInput);
+
+  const uploadIcon = document.createElement('i');
+  uploadIcon.classList.add('btn', 'fas', 'fa-cloud-upload-alt');
+  uploadIcon.addEventListener('click', (e) => {
+    console.log("es clicky");
+  });
+  dom.appendChild(uploadIcon);
+
+  return dom;
+};
+
+
+const NewFolderButton = () => {
+  const dom = document.createElement('span');
+
+  const icon = document.createElement('i');
+  icon.classList.add('icon-button', 'fas', 'fa-folder-plus');
+  icon.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('new-folder-button-click', {
+      bubbles: true,
+    }));
+  });
+  dom.appendChild(icon);
+
+  return dom;
+};
+
+
 export {
   MultiOptionChooser,
   DeleteButton,
   OpenExternalButton,
   UploadButton,
+  UploadButtonNew,
+  NewFolderButton,
 };
