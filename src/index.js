@@ -57,13 +57,13 @@ const Home = () => {
           m.redraw();
         });
 
-        const metaStream = await State.client.getMetaStream('/');
+        //const metaStream = await State.client.getMetaStream('/');
 
-        metaStream.onData((data) => {
-          console.log(data);
-          metaStream.request(1);
-        });
-        metaStream.request(10);
+        //metaStream.onData((data) => {
+        //  console.log(data);
+        //  metaStream.request(1);
+        //});
+        //metaStream.request(10);
 
       })();
     },
@@ -229,7 +229,8 @@ const ControlBar = (checkedItems) => {
       dom.innerText = 'file';
     }
   }
-  else if (numItems > 1) {
+
+  if (numItems > 0) {
     const deleteButton = DeleteButton();
     deleteButton.addEventListener('click', (e) => {
       if (editBox === null) {
