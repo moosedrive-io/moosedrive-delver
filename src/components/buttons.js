@@ -20,27 +20,6 @@ const DeleteButton = () => {
   return IconButton(['fas', 'fa-times']);
 };
 
-function DeleteButtonMithril() {
-  return {
-    view: (vnode) => {
-      return m(MultiOptionChooser,
-        {
-          iconClasses: '.fas.fa-times',
-          hoverText: "Delete",
-          promptText: "Really delete?",
-          option1Text: "Yes",
-          onOption1: () => {
-            vnode.attrs.onDelete();
-          },
-          onOption2: () => {
-          },
-          onCancel: () => {
-          },
-        },
-      );
-    },
-  };
-}
 
 function MultiOptionChooser() {
 
@@ -245,7 +224,6 @@ const NewFolderButton = () => {
 export {
   MultiOptionChooser,
   DeleteButton,
-  DeleteButtonMithril,
   OpenExternalButton,
   UploadButton,
   UploadButtonNew,
