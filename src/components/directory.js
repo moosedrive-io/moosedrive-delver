@@ -1,7 +1,7 @@
 import m from 'mithril';
 import h from 'hyperscript';
 import rein from 'rein-state';
-import { DeleteButton, OpenExternalButton, UploadButton } from './buttons.js';
+import { DeleteButtonMithril, OpenExternalButton, UploadButton } from './buttons.js';
 import { Preview } from './preview.js';
 import { ItemSettings } from './item_settings.js';
 import { getType as getMime } from 'mime';
@@ -237,7 +237,7 @@ const Item = () => {
             :
             null
           ),
-          m(DeleteButton,
+          m(DeleteButtonMithril,
             {
               onDelete: () => {
                 vnode.attrs.onDelete();

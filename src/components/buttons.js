@@ -1,7 +1,26 @@
 import m from 'mithril';
 
 
-function DeleteButton() {
+const IconButton = (iconClasses) => {
+  const dom = document.createElement('span');
+  dom.classList.add('icon-button');
+  const icon = document.createElement('i');
+  iconClasses.forEach(c => {
+    icon.classList.add(c);
+  });
+
+  dom.appendChild(icon);
+
+  console.log(dom);
+
+  return dom;
+};
+
+const DeleteButton = () => {
+  return IconButton(['fas', 'fa-times']);
+};
+
+function DeleteButtonMithril() {
   return {
     view: (vnode) => {
       return m(MultiOptionChooser,
@@ -226,6 +245,7 @@ const NewFolderButton = () => {
 export {
   MultiOptionChooser,
   DeleteButton,
+  DeleteButtonMithril,
   OpenExternalButton,
   UploadButton,
   UploadButtonNew,

@@ -1,6 +1,8 @@
 import { ClientBuilder } from 'remoose-client';
 import { decodeObject } from 'omnistreams';
-import { UploadButton, UploadButtonNew, NewFolderButton } from './components/buttons.js';
+import {
+  DeleteButton, UploadButton, UploadButtonNew, NewFolderButton
+} from './components/buttons.js';
 import { DirectoryAdapter } from './components/directory.js';
 import m from 'mithril';
 import rein from 'rein-state';
@@ -22,7 +24,7 @@ const Home = () => {
     remoAddr: window.location.origin,
   });
 
-  const checkedItems = {};
+  let checkedItems = {};
   
   return {
     oninit: function() {
@@ -119,6 +121,17 @@ const Home = () => {
         controlBarMithril.replaceChild(ControlBar(checkedItems), controlBarMithril.firstChild);
       });
 
+      vnode.dom.addEventListener('delete-selected', (e) => {
+
+        const paths = Object.keys(checkedItems);
+
+        paths.forEach((path) => {
+          State.client.delete(path);
+        });
+
+        checkedItems = {};
+      });
+
     },
 
     view: function() {
@@ -176,7 +189,7 @@ const ControlBar = (checkedItems) => {
   buttonContainer.classList.add('control-bar__buttons');
   dom.appendChild(buttonContainer);
 
-  let nameInput = null;
+  let editBox = null;
 
   const keys = Object.keys(checkedItems);
   const numItems = keys.length;
@@ -191,24 +204,24 @@ const ControlBar = (checkedItems) => {
 
       buttonContainer.addEventListener('new-folder-button-click', (e) => {
 
-        if (nameInput === null) {
-          nameInput = document.createElement('div');
-          nameInput.classList.add('control-bar__folder-name-input');
-          dom.appendChild(nameInput);
+        if (editBox === null) {
+          editBox = document.createElement('div');
+          editBox.classList.add('control-bar__folder-name-input');
+          dom.appendChild(editBox);
 
           async function submitName(name) {
             const folderPath = pathStr + '/' + name;
             const result = await State.client.createFolder(folderPath);
-            dom.removeChild(nameInput);
-            nameInput = null;
+            dom.removeChild(editBox);
+            editBox = null;
           }
 
           function cancel() {
-            dom.removeChild(nameInput);
-            nameInput = null;
+            dom.removeChild(editBox);
+            editBox = null;
           }
 
-          nameInput.appendChild(NameInput(submitName, cancel));
+          editBox.appendChild(NameInput(submitName, cancel));
         }
       });
     }
@@ -216,8 +229,34 @@ const ControlBar = (checkedItems) => {
       dom.innerText = 'file';
     }
   }
-  else {
-    dom.innerText = 'Hi there ' + numItems;
+  else if (numItems > 1) {
+    const deleteButton = DeleteButton();
+    deleteButton.addEventListener('click', (e) => {
+      if (editBox === null) {
+        editBox = document.createElement('div');
+        editBox.classList.add('control-bar__confirm-delete');
+        dom.appendChild(editBox);
+
+        async function onConfirm() {
+
+          dom.dispatchEvent(new CustomEvent('delete-selected', {
+            bubbles: true,
+          }));
+
+          dom.removeChild(editBox);
+          editBox = null;
+        }
+
+        function onCancel() {
+          dom.removeChild(editBox);
+          editBox = null;
+        }
+
+        const paths = Object.keys(checkedItems);
+        editBox.appendChild(ConfirmInput(`Delete ${paths.length} items?`, onConfirm, onCancel));
+      }
+    });
+    buttonContainer.appendChild(deleteButton);
   }
 
   return dom;
@@ -261,6 +300,27 @@ const NameInput = (onSubmit, onCancel) => {
   nameInput.appendChild(cancelButton);
 
   return nameInput;
+};
+
+
+const ConfirmInput = (prompt, onConfirm, onCancel) => {
+  const dom = document.createElement('div');
+  dom.classList.add('confirm-input');
+  const promptEl = document.createElement('div');
+  promptEl.innerText = prompt;
+  dom.appendChild(promptEl);
+
+  const confirmButton = document.createElement('button');
+  confirmButton.innerText = 'Confirm';
+  confirmButton.addEventListener('click', onConfirm);
+  dom.appendChild(confirmButton);
+
+  const cancelButton = document.createElement('button');
+  cancelButton.innerText = 'Cancel';
+  cancelButton.addEventListener('click', onCancel);
+  dom.appendChild(cancelButton);
+
+  return dom;
 };
 
 // TODO: pretty sure this should be replaced with encodePath
