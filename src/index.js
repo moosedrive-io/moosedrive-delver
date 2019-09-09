@@ -221,7 +221,7 @@ const ControlBar = (checkedItems) => {
             editBox = null;
           }
 
-          editBox.appendChild(NameInput(submitName, cancel));
+          editBox.appendChild(NewFolderNameInput(pathStr, submitName, cancel));
         }
       });
     }
@@ -263,6 +263,16 @@ const ControlBar = (checkedItems) => {
   return dom;
 };
 
+
+const NewFolderNameInput = (parentPath, onSubmit, onCancel) => {
+  const dom = document.createElement('div');
+  dom.classList.add('new-folder-name-input');
+  const prompt = document.createElement('div');
+  prompt.innerText = `Creating new folder in ${parentPath}/`;
+  dom.appendChild(prompt);
+  dom.appendChild(NameInput(onSubmit, onCancel));
+  return dom;
+};
 
 const NameInput = (onSubmit, onCancel) => {
   const nameInput = document.createElement('div');

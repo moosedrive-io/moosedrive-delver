@@ -63,6 +63,11 @@
   font-size: 20px;
 }
 
+.new-folder-name-input {
+  font-family: Courier New;
+  font-weight: bold;
+}
+
 .main__directory {
   padding-top: var(--control-bar-height);
 }
