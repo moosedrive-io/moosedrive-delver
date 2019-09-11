@@ -1,7 +1,10 @@
+import m from 'mithril';
 import { TextButton } from './buttons';
 
 
 const TextFileEditor = (options) => {
+
+  const editFilename = options && options.editFilename === false ? false : true;
 
   const textFileEditor = document.createElement('div');
   textFileEditor.classList.add('text-file-editor');
@@ -14,15 +17,17 @@ const TextFileEditor = (options) => {
   header.innerText = "Text File Editor";
   textFileEditor.appendChild(header);
 
-  const filenamePrompt = document.createElement('div');
-  filenamePrompt.innerText = "Filename:";
-  textFileEditor.appendChild(filenamePrompt);
+  if (editFilename) {
+    const filenamePrompt = document.createElement('div');
+    filenamePrompt.innerText = "Filename:";
+    textFileEditor.appendChild(filenamePrompt);
 
-  const filenameInput = document.createElement('input');
-  filenameInput.addEventListener('keyup', (e) => {
-    filename = e.target.value;
-  });
-  textFileEditor.appendChild(filenameInput);
+    const filenameInput = document.createElement('input');
+    filenameInput.addEventListener('keyup', (e) => {
+      filename = e.target.value;
+    });
+    textFileEditor.appendChild(filenameInput);
+  }
 
   const saveButton = TextButton("Save");
   saveButton.addEventListener('click', (e) => {
@@ -72,11 +77,32 @@ const TextEditor = (options) => {
   });
   textEditor.appendChild(textArea);
 
-  if (options.initialText) {
-    //textEditor.value = options.initialText;
+  if (options && options.initialText) {
+    textArea.value = options.initialText;
   }
 
   return textEditor;
 };
 
-export { TextFileEditor };
+
+const TextFileEditorMithril = () => {
+  return {
+    onbeforeupdate: (vnode) => {
+      // mithril should ignore this component
+      return false;
+    },
+
+    oncreate: (vnode) => {
+      vnode.dom.appendChild(TextFileEditor(vnode.attrs.options));
+    },
+
+    view: (vnode) => {
+      return m('.text-file-editor-mithril');
+    }
+  };
+};
+
+export {
+  TextFileEditor,
+  TextFileEditorMithril,
+};

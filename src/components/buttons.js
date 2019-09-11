@@ -18,8 +18,6 @@ const IconButton = (iconClasses) => {
 
   dom.appendChild(icon);
 
-  console.log(dom);
-
   return dom;
 };
 
@@ -75,7 +73,6 @@ function MultiOptionChooser() {
                   vnode.attrs.onOption2();
                   state = 'unselected';
 
-                  console.log("oh it clicked");
                   e.stopPropagation();
                   e.preventDefault();
                 }
@@ -135,7 +132,6 @@ function UploadButton() {
 
       folderUploadElem = vnode.dom.querySelector('#folder-input');
       folderUploadElem.addEventListener('change', (e) => {
-        console.log(e);
         //vnode.attrs.onSelection(e);
       });
       folderUploadElem.addEventListener('click', (e) => {
@@ -167,11 +163,9 @@ function UploadButton() {
             option1Text: "Folder",
             option2Text: "File(s)",
             onOption1: () => {
-              console.log("folder");
               folderUploadElem.click();
             },
             onOption2: () => {
-              console.log("files");
               fileUploadElem.click();
             },
             onCancel: () => {
@@ -204,7 +198,6 @@ const UploadButtonNew = () => {
   const uploadIcon = document.createElement('i');
   uploadIcon.classList.add('btn', 'fas', 'fa-cloud-upload-alt');
   uploadIcon.addEventListener('click', (e) => {
-    console.log("es clicky");
   });
   dom.appendChild(uploadIcon);
 

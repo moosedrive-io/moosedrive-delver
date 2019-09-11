@@ -1,6 +1,7 @@
 import m from 'mithril';
 import { getType as getMime } from 'mime';
 import { DirectoryAdapter } from './directory.js';
+import { TextFileEditor } from './text_editor.js';
 
 
 const Preview = () => {
@@ -91,53 +92,29 @@ const Preview = () => {
 const TextPreview = () => {
 
   let text = "";
-  let responseText = "";
 
   return {
-    oninit: async (vnode) => {
-      responseText = await m.request({
+    onbeforeupdate: (vnode) => {
+      // mithril should ignore this component
+      return false;
+    },
+
+    oncreate: async (vnode) => {
+
+      text = await m.request({
         url: vnode.attrs.url,
         withCredentials: true,
         responseType: 'text',
       });
 
-      text = responseText;
+      vnode.dom.appendChild(TextFileEditor({
+        initialText: text,
+        editFilename: false,
+      }));
     },
 
     view: (vnode) => {
-      return m('.div',
-        m('button',
-          {
-            onclick: () => {
-              vnode.dom.dispatchEvent(new CustomEvent('save', {
-                bubbles: true,
-                detail: {
-                  path: vnode.attrs.path,
-                  text,
-                },
-              }));
-            },
-          },
-          "Save"
-        ), 
-        //m('button',
-        //  {
-        //    onclick: () => {
-        //      text = responseText;
-        //    },
-        //  },
-        //  "Reset"
-        //),
-        m('textarea.text-preview__textarea',
-          {
-            spellcheck: false,
-            oninput: (e) => {
-              text = e.target.value;
-            },
-          },
-          text,
-        ),
-      );
+      return m('.text-preview');
     },
   };
 };

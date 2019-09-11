@@ -21,7 +21,6 @@ const DirectoryAdapter = () => {
     },
 
     view: (vnode) => {
-      console.log("render dir");
       return m('.directory-adapter');
     }
   };
@@ -59,8 +58,6 @@ const ReinDirectory = (path, data, renderState) => {
   );
 
   rein.onAdd(data, (name) => {
-
-    console.log("rein add");
 
     // TODO: could do a binary insertion to be more efficient, rather than
     // resorting the whole list
@@ -154,8 +151,13 @@ const Item = () => {
       vnode.dom.addEventListener('upload-text-file', (e) => {
         if (e.detail.path === undefined) {
           e.detail.path = [...path, e.detail.filename];
-          console.log("set path", e.detail, path);
         }
+      });
+
+      vnode.dom.addEventListener('exit', (e) => {
+        state = 'minimized';
+        m.redraw();
+        e.stopPropagation();
       });
     },
 
@@ -340,14 +342,17 @@ const ItemControls = (item) => {
     const addFileButton = IconButton(['fas', 'fa-plus']);
     addFileButton.addEventListener('click', (e) => {
       if (content === null) {
-        content = TextFileEditor({
-          initialText: "Hi there",
-        });
+        content = TextFileEditor();
         content.addEventListener('save', (e) => {
-          dom.dispatchEvent(new CustomEvent('upload-text-file', {
-            bubbles: true,
-            detail: e.detail,
-          }));
+          if (!e.detail.filename) {
+            alert("Must provide filename");
+          }
+          else {
+            dom.dispatchEvent(new CustomEvent('upload-text-file', {
+              bubbles: true,
+              detail: e.detail,
+            }));
+          }
         });
         content.addEventListener('exit', (e) => {
           dom.removeChild(content);

@@ -75,7 +75,6 @@ const Home = () => {
       });
 
       vnode.dom.addEventListener('add-viewer', (e) => {
-        console.log('add-viewer-event', e.detail);
         State.client.addViewer(buildPathStr(e.detail.path), e.detail.viewerId);
         //State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
       });
@@ -101,8 +100,6 @@ const Home = () => {
       vnode.dom.addEventListener('upload-text-file', (e) => {
         const path = e.detail.path;
         const pathStr = encodePath(path);
-        console.log("do it", pathStr);
-        //console.log(pathStr, e.detail.text);
         State.client.storeTextFile(pathStr, e.detail.text);
       });
 
