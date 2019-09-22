@@ -250,7 +250,10 @@ const Item = () => {
           m('a.file',
             {
               title: "Download",
-              href: url + '?download=true',
+              // TODO: adding the '/' here is a hack to allow downloads even
+              // when there's a redirect from the server. Need to properly
+              // handle including params on redirect in the server code.
+              href: url + '/?download=true',
               onclick: (e) => {
                 e.stopPropagation();
                 //vnode.attrs.ondownload();
