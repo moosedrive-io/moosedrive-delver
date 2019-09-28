@@ -47,13 +47,14 @@ const ReinDirectory = (path, data, renderState) => {
     }),
   );
 
+  console.log(path);
   const dom = h('.directory',
     h('.directory__separator',
-      ">>> " + '/' + path.join('/'),
+      path.length > 0 ? '/' + path.join('/') + '/' : '/',
     ),
     itemsElem,
     h('.directory__separator',
-      "<<< " + '/' + path.join('/'),
+      path.length > 1 ? '/' + path.slice(0, -1).join('/') + '/' : '/',
     ),
   );
 
@@ -210,9 +211,10 @@ const Item = () => {
         );
       }
 
+      const headerClasses = '.item__header' + (state === 'expanded' ? '.item__header--expanded' : '');
 
       return m('.item',
-        m('.item__header',
+        m(headerClasses,
           { 
             onclick: (e) => {
               state = state === 'minimized' ? 'expanded' : 'minimized';
@@ -293,13 +295,13 @@ const Item = () => {
             },
           ),
         ),
-        state === 'expanded' ? m(ItemControlsMithril,
-          {
-            item,
-          }
-        )
-        :
-        null,
+        //state === 'expanded' ? m(ItemControlsMithril,
+        //  {
+        //    item,
+        //  }
+        //)
+        //:
+        //null,
         m(Preview,
           {
             state,

@@ -108,6 +108,11 @@
 .item__header__open-external-btn {
   float: right;
 }
+.item__header--expanded {
+  background-color: var(--text-color);
+  color: var(--background-color);
+  border: 1px solid #ffffff;
+}
 
 .item__checkbox {
   margin-left: 10px;
