@@ -1,7 +1,7 @@
 import m from 'mithril';
 import h from 'hyperscript';
 import rein from 'rein-state';
-import { OpenExternalButton, UploadButton, IconButton } from './buttons.js';
+import { OpenExternalButton, DownloadButton, IconButton } from './buttons.js';
 import { Preview } from './preview.js';
 import { ItemSettings } from './item_settings.js';
 import { TextFileEditor } from './text_editor.js';
@@ -47,7 +47,6 @@ const ReinDirectory = (path, data, renderState) => {
     }),
   );
 
-  console.log(path);
   const dom = h('.directory',
     h('.directory__separator',
       path.length > 0 ? '/' + path.join('/') + '/' : '/',
@@ -136,6 +135,23 @@ const Item = () => {
   return {
 
     oncreate: (vnode) => {
+
+
+      const fileInput = document.createElement('input');
+      fileInput.classList.add('upload-button__input');
+      fileInput.setAttribute('type', 'file');
+      fileInput.setAttribute('multiple', true);
+      vnode.dom.appendChild(fileInput);
+
+      const folderInput = document.createElement('input');
+      folderInput.classList.add('upload-button__input');
+      folderInput.setAttribute('type', 'file');
+      folderInput.setAttribute('directory', true);
+      folderInput.setAttribute('webkitdirectory', true);
+      folderInput.setAttribute('mozdirectory', true);
+      vnode.dom.appendChild(folderInput);
+
+
       vnode.dom.addEventListener('set-public-view', (e) => {
         // modify the event in place
         if (e.detail.path === undefined) {
@@ -160,6 +176,38 @@ const Item = () => {
         m.redraw();
         e.stopPropagation();
       });
+
+      vnode.dom.addEventListener('permissions-selected', (e) => {
+        settingsSelected = settingsSelected === 'permissions' ? null : 'permissions';
+        renderState.settings.selected = renderState.settings.selected === 'permissions' ? null : 'permissions';
+        e.stopPropagation();
+      });
+
+      vnode.dom.addEventListener('tags-selected', (e) => {
+        renderState.settings.selected = renderState.settings.selected === 'tags' ? null : 'tags';
+        e.stopPropagation();
+      });
+
+      vnode.dom.addEventListener('choose-upload-file', (e) => {
+        fileInput.click();
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+
+          vnode.dom.dispatchEvent(new CustomEvent('upload-file', {
+            bubbles: true,
+            detail: {
+              path,
+              file,
+            },
+          }));
+        });
+        e.stopPropagation();
+      });
+
+      vnode.dom.addEventListener('choose-upload-folder', (e) => {
+        folderInput.click();
+        e.stopPropagation();
+      });
     },
 
     view: (vnode) => {
@@ -172,43 +220,11 @@ const Item = () => {
       const item = vnode.attrs.data;
 
       let icon;
-      let openExternalButton = null;
-      let uploadButton = null;
       if (type === 'file') {
         icon = 'i.fas.fa-file';
-        openExternalButton = m('.item__header__open-external-btn',
-          {
-            title: "Open in tab",
-            onclick: (e) => {
-              e.stopPropagation();
-            },
-          },
-          m(OpenExternalButton,
-            {
-              url,
-            }
-          ),
-        );
       }
       else {
         icon = 'i.fas.fa-folder';
-
-        uploadButton = m(UploadButton,
-          {
-            onSelection: (e) => {
-
-              const file = e.target.files[0];
-
-              vnode.dom.dispatchEvent(new CustomEvent('upload-file', {
-                bubbles: true,
-                detail: {
-                  path,
-                  file,
-                },
-              }));
-            },
-          }
-        );
       }
 
       const headerClasses = '.item__header' + (state === 'expanded' ? '.item__header--expanded' : '');
@@ -249,44 +265,15 @@ const Item = () => {
             :
             null
           ),
-          m('a.file',
-            {
-              title: "Download",
-              // TODO: adding the '/' here is a hack to allow downloads even
-              // when there's a redirect from the server. Need to properly
-              // handle including params on redirect in the server code.
-              href: url + '/?download=true',
-              onclick: (e) => {
-                e.stopPropagation();
-                //vnode.attrs.ondownload();
-              },
-            },
-            m('i.btn.item__btn.fas.fa-download'),
-          ),
-          m('span.item__permissions-btn',
-            {
-              title: "Sharing is caring",
-              onclick: (e) => {
-                e.stopPropagation();
-                settingsSelected = settingsSelected === 'permissions' ? null : 'permissions';
-                renderState.settings.selected = renderState.settings.selected === 'permissions' ? null : 'permissions';
-              },
-            },
-            m('i.btn.item__btn.fas.fa-user-friends'),
-          ),
-          m('span.item__tags-btn',
-            {
-              title: "Tags",
-              onclick: (e) => {
-                e.stopPropagation();
-                renderState.settings.selected = renderState.settings.selected === 'tags' ? null : 'tags';
-              },
-            },
-            m('i.btn.item__btn.fas.fa-tags'),
-          ),
-          openExternalButton,
-          uploadButton,
         ),
+        state === 'expanded' ? m(ItemControlsMithril,
+          {
+            item,
+            url,
+          }
+        )
+        :
+        null,
         m('.item__settings',
           m(ItemSettingsAdapter,
             {
@@ -295,13 +282,6 @@ const Item = () => {
             },
           ),
         ),
-        //state === 'expanded' ? m(ItemControlsMithril,
-        //  {
-        //    item,
-        //  }
-        //)
-        //:
-        //null,
         m(Preview,
           {
             state,
@@ -326,7 +306,7 @@ const ItemControlsMithril = () => {
     },
 
     oncreate: (vnode) => {
-      const itemControls = ItemControls(vnode.attrs.item);
+      const itemControls = ItemControls(vnode.attrs.item, vnode.attrs.url);
       vnode.dom.appendChild(itemControls);
     },
 
@@ -337,37 +317,106 @@ const ItemControlsMithril = () => {
 };
 
 
-const ItemControls = (item) => {
+const ItemControls = (item, url) => {
   const dom = document.createElement('div');
   dom.classList.add('item-controls');
 
   let content = null;
 
+  const header = document.createElement('div');
+  header.classList.add('item-controls__header');
+  dom.appendChild(header);
+
   if (item.type === 'dir') {
+
     const addFileButton = IconButton(['fas', 'fa-plus']);
     addFileButton.addEventListener('click', (e) => {
-      if (content === null) {
-        content = TextFileEditor();
-        content.addEventListener('save', (e) => {
-          if (!e.detail.filename) {
-            alert("Must provide filename");
-          }
-          else {
-            dom.dispatchEvent(new CustomEvent('upload-text-file', {
-              bubbles: true,
-              detail: e.detail,
-            }));
-          }
-        });
-        content.addEventListener('exit', (e) => {
-          dom.removeChild(content);
-          content = null;
-        });
-        dom.appendChild(content);
+      if (content) {
+        dom.removeChild(content);
+        content = null;
       }
+
+      content = TextFileEditor();
+      content.addEventListener('save', (e) => {
+        if (!e.detail.filename) {
+          alert("Must provide filename");
+        }
+        else {
+          dom.dispatchEvent(new CustomEvent('upload-text-file', {
+            bubbles: true,
+            detail: e.detail,
+          }));
+        }
+      });
+      content.addEventListener('exit', (e) => {
+        dom.removeChild(content);
+        content = null;
+      });
+      dom.appendChild(content);
     });
-    dom.appendChild(addFileButton);
+    header.appendChild(addFileButton);
   }
+  else if (item.type === 'file') {
+    const openExternalButton = OpenExternalButton(url);
+    header.appendChild(openExternalButton);
+  }
+
+  const tagsButton = IconButton(['btn', 'item__btn', 'fas', 'fa-tags']);
+  tagsButton.setAttribute('title', "Tags");
+  tagsButton.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('tags-selected', {
+      bubbles: true,
+    }));
+  });
+  header.appendChild(tagsButton);
+
+  const permButton = IconButton(['btn', 'item__btn', 'fas', 'fa-user-friends']);
+  permButton.addEventListener('click', (e) => {
+    dom.dispatchEvent(new CustomEvent('permissions-selected', {
+      bubbles: true,
+    }));
+  });
+  header.appendChild(permButton);
+
+  const uploadButton = IconButton(['fas', 'fa-cloud-upload-alt']);
+  uploadButton.addEventListener('click', (e) => {
+    if (content) {
+      dom.removeChild(content);
+      content = null;
+    }
+
+    content = h('.upload-chooser',
+      h('button',
+        {
+          onclick: (e) => {
+            dom.dispatchEvent(new CustomEvent('choose-upload-file', {
+              bubbles: true,
+            }));
+            dom.removeChild(content);
+            content = null;
+          }
+        },
+        "File",
+      ),
+      h('button',
+        {
+          onclick: (e) => {
+            dom.dispatchEvent(new CustomEvent('choose-upload-folder', {
+              bubbles: true,
+            }));
+            dom.removeChild(content);
+            content = null;
+          }
+        },
+        "Folder",
+      ),
+    );
+    dom.appendChild(content);
+  });
+  header.appendChild(uploadButton);
+
+  const downloadLink = DownloadButton(item.type, url);
+  header.appendChild(downloadLink);
 
   return dom;
 };
@@ -390,7 +439,13 @@ const ItemSettingsAdapter = () => {
   };
 };
 
+const UploadInputs = () => {
+  const dom = document.createElement('span');
 
+  
+
+  return { fileInput, folderInput };
+};
 export {
   DirectoryAdapter,
 };

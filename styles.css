@@ -105,9 +105,6 @@
 .item__header:hover {
   background-color: #bbbbbb;
 }
-.item__header__open-external-btn {
-  float: right;
-}
 .item__header--expanded {
   background-color: var(--text-color);
   color: var(--background-color);
@@ -131,6 +128,10 @@
 .item-controls {
   font-size: 32px;
 }
+.item-controls__header {
+  display: flex;
+  justify-content: right;
+}
 
 .btn {
   padding-left: 2.5px;
@@ -148,10 +149,6 @@
 }
 .icon-button:hover {
   background-color: var(--hover-color);
-}
-
-.item__btn {
-  float: right;
 }
 
 .item__download_btn:hover {
@@ -178,7 +175,7 @@
   float: right;
 }
 
-.open-external-btn {
+.open-external-btn__link {
   color: var(--text-color);
   text-decoration: none;
 }

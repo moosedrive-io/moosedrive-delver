@@ -26,181 +26,34 @@ const DeleteButton = () => {
 };
 
 
-function MultiOptionChooser() {
-
-  let state = 'unselected';
-
-  return {
-    view: (vnode) => {
-      return m('span.btn.multi-option-chooser',
-        m('i' + vnode.attrs.iconClasses,
-          { 
-            title: vnode.attrs.hoverText,
-            onclick: (e) => {
-              state = 'confirm';
-              e.stopPropagation();
-              e.preventDefault();
-            },
-          },
-        ),
-        state === 'unselected' ?
-        null
-        :
-        m('span.multi-option-chooser__confirm',
-          {
-            onclick: (e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }
-          },
-          vnode.attrs.promptText,
-          m('button.multi-option-chooser__option1-btn',
-            {
-              onclick: (e) => {
-                vnode.attrs.onOption1();
-                state = 'unselected';
-
-                e.stopPropagation();
-                e.preventDefault();
-              }
-            },
-            vnode.attrs.option1Text,
-          ),
-          vnode.attrs.option2Text ?
-            m('button.multi-option-chooser__option2-btn',
-              {
-                onclick: (e) => {
-                  vnode.attrs.onOption2();
-                  state = 'unselected';
-
-                  e.stopPropagation();
-                  e.preventDefault();
-                }
-              },
-              vnode.attrs.option2Text
-          )
-          :
-          null
-          ,
-          m('button.multi-option-chooser__cancel-btn',
-            {
-              onclick: (e) => {
-                vnode.attrs.onCancel();
-                state = 'unselected';
-              }
-            },
-            "Cancel",
-          ),
-        ),
-      );
-    },
-  };
-}
-
-function OpenExternalButton() {
-  return {
-    view: (vnode) => {
-      return m('a.btn.open-external-btn',
-        { 
-          href: vnode.attrs.url,
-          target: '_blank',
-          //onclick: (e) => {
-          //  //e.preventDefault();
-          //},
-        },
-        m('i.fas.fa-external-link-alt'),
-      );
-    },
-  };
-}
-
-
-function UploadButton() {
-
-  let fileUploadElem;
-  let folderUploadElem;
-
-  return {
-    oncreate: (vnode) => {
-      fileUploadElem = vnode.dom.querySelector('#file-input');
-      fileUploadElem.addEventListener('change', (e) => {
-        vnode.attrs.onSelection(e);
-      });
-      fileUploadElem.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
-
-      folderUploadElem = vnode.dom.querySelector('#folder-input');
-      folderUploadElem.addEventListener('change', (e) => {
-        //vnode.attrs.onSelection(e);
-      });
-      folderUploadElem.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
-    },
-    view: (vnode) => {
-      return m('span.upload-btn',
-        m('input.#file-input.upload-btn__input',
-          {
-            type: 'file',
-            multiple: true,
-          }
-        ),
-        m('input.#folder-input.upload-btn__input',
-          {
-            type: 'file',
-            // TODO: which of the following 3 are actually necessary? It seems
-            // to at least need webkitdirectory and mozdirectory in Firefox
-            directory: true,
-            webkitdirectory: true,
-            mozdirectory: true,
-          }
-        ),
-        m(MultiOptionChooser,
-          {
-            iconClasses: '.fas.fa-cloud-upload-alt',
-            promptText: "Upload:",
-            option1Text: "Folder",
-            option2Text: "File(s)",
-            onOption1: () => {
-              folderUploadElem.click();
-            },
-            onOption2: () => {
-              fileUploadElem.click();
-            },
-            onCancel: () => {
-            },
-          }
-        ),
-      );
-    },
-  };
-}
-
-
-const UploadButtonNew = () => {
+const OpenExternalButton = (url) => {
   const dom = document.createElement('span');
+  dom.classList.add('open-external-btn');
+  const link = document.createElement('a');
+  link.classList.add('open-external-btn__link');
+  link.setAttribute('href', url);
+  link.setAttribute('target', '_blank');
+  dom.appendChild(link);
+  const icon = IconButton(['fas', 'fa-external-link-alt']);
+  link.appendChild(icon);
+  return dom;
+};
 
-  const fileInput = document.createElement('input');
-  fileInput.classList.add('upload-button__input');
-  fileInput.setAttribute('type', 'file');
-  fileInput.setAttribute('multiple', true);
-  dom.appendChild(fileInput);
 
-  const folderInput = document.createElement('input');
-  folderInput.classList.add('upload-button__input');
-  folderInput.setAttribute('type', 'file');
-  folderInput.setAttribute('directory', true);
-  folderInput.setAttribute('webkitdirectory', true);
-  folderInput.setAttribute('mozdirectory', true);
-  dom.appendChild(folderInput);
-
-  const uploadIcon = document.createElement('i');
-  uploadIcon.classList.add('btn', 'fas', 'fa-cloud-upload-alt');
-  uploadIcon.addEventListener('click', (e) => {
-  });
-  dom.appendChild(uploadIcon);
-
+const DownloadButton = (itemType, url) => {
+  const dom = document.createElement('span');
+  dom.classList.add('download-btn');
+  const downloadLink = document.createElement('a');
+  downloadLink.classList.add('file');
+  // TODO: adding the '/' here is a hack to allow downloads even
+  // when there's a redirect from the server. Need to properly
+  // handle including params on redirect in the server code.
+  const params = itemType === 'file' ? '?download=true' : '/?download=true' 
+  downloadLink.setAttribute('href', url + params);
+  downloadLink.setAttribute('title', "Download");
+  const downloadButton = IconButton(['btn', 'fas', 'fa-download']);
+  downloadLink.appendChild(downloadButton);
+  dom.appendChild(downloadLink);
   return dom;
 };
 
@@ -222,12 +75,10 @@ const NewFolderButton = () => {
 
 
 export {
-  MultiOptionChooser,
   DeleteButton,
   OpenExternalButton,
-  UploadButton,
-  UploadButtonNew,
   NewFolderButton,
   TextButton,
   IconButton,
+  DownloadButton,
 };
