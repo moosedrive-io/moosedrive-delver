@@ -1,4 +1,4 @@
-import { ClientBuilder } from 'remoose-client';
+import { ClientBuilder } from 'moosedrive-api-client';
 import { decodeObject } from 'omnistreams';
 import {
   DeleteButton, UploadButton, UploadButtonNew, NewFolderButton

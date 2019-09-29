@@ -146,7 +146,6 @@ const Item = () => {
           const filenameParts = file.name.split('/');
           const dir = [...path, ...filenameParts.slice(0, -1)];
           const filename = filenameParts[filenameParts.length - 1];
-          console.log(dir, filename);
           vnode.dom.dispatchEvent(new CustomEvent('upload-file', {
             bubbles: true,
             detail: {
