@@ -6,6 +6,7 @@ import { Preview } from './preview.js';
 import { ItemSettings } from './item_settings.js';
 import { TextFileEditor } from './text_editor.js';
 import { getType as getMime } from 'mime';
+import Uppie from 'uppie';
 
 
 const DirectoryAdapter = () => {
@@ -135,12 +136,35 @@ const Item = () => {
   return {
 
     oncreate: (vnode) => {
-      
+
+      const uppie = new Uppie();
+
+      const handleFiles = async (e, formData, filenames) => {
+        for (const param of formData) {
+          const file = param[1];
+
+          const filenameParts = file.name.split('/');
+          const dir = [...path, ...filenameParts.slice(0, -1)];
+          const filename = filenameParts[filenameParts.length - 1];
+          console.log(dir, filename);
+          vnode.dom.dispatchEvent(new CustomEvent('upload-file', {
+            bubbles: true,
+            detail: {
+              path,
+              file,
+            },
+          }));
+        }
+      };
+
       const fileInput = InvisibleFileInput(path);
+      uppie(fileInput, handleFiles);
       vnode.dom.appendChild(fileInput);
       
       const folderInput = InvisibleFolderInput(path);
+      uppie(folderInput, handleFiles);
       vnode.dom.appendChild(folderInput);
+
 
       vnode.dom.addEventListener('set-public-view', (e) => {
         // modify the event in place
@@ -178,7 +202,7 @@ const Item = () => {
         e.stopPropagation();
       });
 
-      vnode.dom.addEventListener('choose-upload-file', (e) => {
+      vnode.dom.addEventListener('choose-upload-files', (e) => {
         
         fileInput.click();
         e.stopPropagation();
@@ -369,14 +393,14 @@ const ItemControls = (item, url) => {
       h('button',
         {
           onclick: (e) => {
-            dom.dispatchEvent(new CustomEvent('choose-upload-file', {
+            dom.dispatchEvent(new CustomEvent('choose-upload-files', {
               bubbles: true,
             }));
             dom.removeChild(content);
             content = null;
           }
         },
-        "File",
+        "File(s)",
       ),
       h('button',
         {
@@ -424,16 +448,6 @@ const InvisibleFileInput = (path) => {
   const fileInput = document.createElement('input');
   fileInput.classList.add('upload-button__input');
   fileInput.setAttribute('type', 'file');
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    fileInput.dispatchEvent(new CustomEvent('upload-file', {
-      bubbles: true,
-      detail: {
-        path,
-        file,
-      },
-    }));
-  });
   fileInput.setAttribute('multiple', true);
   return fileInput;
 };
@@ -446,17 +460,6 @@ const InvisibleFolderInput = (path) => {
   folderInput.setAttribute('directory', true);
   folderInput.setAttribute('webkitdirectory', true);
   folderInput.setAttribute('mozdirectory', true);
-  folderInput.addEventListener('change', (e) => {
-    console.log(e.target.files);
-    //const file = e.target.files[0];
-    //vnode.dom.dispatchEvent(new CustomEvent('upload-file', {
-    //  bubbles: true,
-    //  detail: {
-    //    path,
-    //    file,
-    //  },
-    //}));
-  });
   return folderInput;
 };
 

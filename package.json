@@ -15,7 +15,8 @@
     "mithril": "^2.0.0-rc.6",
     "normalize.css": "^8.0.1",
     "omnistreams": "^0.7.0",
-    "omnistreams-filereader": "^0.5.0"
+    "omnistreams-filereader": "^0.5.0",
+    "uppie": "^1.1.2"
   },
   "devDependencies": {
     "webpack": "^4.33.0",
