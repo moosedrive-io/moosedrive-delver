@@ -135,22 +135,12 @@ const Item = () => {
   return {
 
     oncreate: (vnode) => {
-
-
-      const fileInput = document.createElement('input');
-      fileInput.classList.add('upload-button__input');
-      fileInput.setAttribute('type', 'file');
-      fileInput.setAttribute('multiple', true);
+      
+      const fileInput = InvisibleFileInput(path);
       vnode.dom.appendChild(fileInput);
-
-      const folderInput = document.createElement('input');
-      folderInput.classList.add('upload-button__input');
-      folderInput.setAttribute('type', 'file');
-      folderInput.setAttribute('directory', true);
-      folderInput.setAttribute('webkitdirectory', true);
-      folderInput.setAttribute('mozdirectory', true);
+      
+      const folderInput = InvisibleFolderInput(path);
       vnode.dom.appendChild(folderInput);
-
 
       vnode.dom.addEventListener('set-public-view', (e) => {
         // modify the event in place
@@ -189,18 +179,8 @@ const Item = () => {
       });
 
       vnode.dom.addEventListener('choose-upload-file', (e) => {
+        
         fileInput.click();
-        fileInput.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-
-          vnode.dom.dispatchEvent(new CustomEvent('upload-file', {
-            bubbles: true,
-            detail: {
-              path,
-              file,
-            },
-          }));
-        });
         e.stopPropagation();
       });
 
@@ -439,13 +419,47 @@ const ItemSettingsAdapter = () => {
   };
 };
 
-const UploadInputs = () => {
-  const dom = document.createElement('span');
 
-  
-
-  return { fileInput, folderInput };
+const InvisibleFileInput = (path) => {
+  const fileInput = document.createElement('input');
+  fileInput.classList.add('upload-button__input');
+  fileInput.setAttribute('type', 'file');
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    fileInput.dispatchEvent(new CustomEvent('upload-file', {
+      bubbles: true,
+      detail: {
+        path,
+        file,
+      },
+    }));
+  });
+  fileInput.setAttribute('multiple', true);
+  return fileInput;
 };
+
+
+const InvisibleFolderInput = (path) => {
+  const folderInput = document.createElement('input');
+  folderInput.classList.add('upload-button__input');
+  folderInput.setAttribute('type', 'file');
+  folderInput.setAttribute('directory', true);
+  folderInput.setAttribute('webkitdirectory', true);
+  folderInput.setAttribute('mozdirectory', true);
+  folderInput.addEventListener('change', (e) => {
+    console.log(e.target.files);
+    //const file = e.target.files[0];
+    //vnode.dom.dispatchEvent(new CustomEvent('upload-file', {
+    //  bubbles: true,
+    //  detail: {
+    //    path,
+    //    file,
+    //  },
+    //}));
+  });
+  return folderInput;
+};
+
 export {
   DirectoryAdapter,
 };
