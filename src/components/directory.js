@@ -1,7 +1,7 @@
 import m from 'mithril';
 import h from 'hyperscript';
 import rein from 'rein-state';
-import { OpenExternalButton, DownloadButton, IconButton } from './buttons.js';
+import { OpenExternalButton, NewFolderButton, DownloadButton, IconButton } from './buttons.js';
 import { Preview } from './preview.js';
 import { ItemSettings } from './item_settings.js';
 import { TextFileEditor } from './text_editor.js';
@@ -273,6 +273,7 @@ const Item = () => {
           {
             item,
             url,
+            path: vnode.attrs.path,
           }
         )
         :
@@ -309,7 +310,7 @@ const ItemControlsMithril = () => {
     },
 
     oncreate: (vnode) => {
-      const itemControls = ItemControls(vnode.attrs.item, vnode.attrs.url);
+      const itemControls = ItemControls(vnode.attrs.item, vnode.attrs.url, vnode.attrs.path);
       vnode.dom.appendChild(itemControls);
     },
 
@@ -320,7 +321,7 @@ const ItemControlsMithril = () => {
 };
 
 
-const ItemControls = (item, url) => {
+const ItemControls = (item, url, path) => {
   const dom = document.createElement('div');
   dom.classList.add('item-controls');
 
@@ -330,14 +331,19 @@ const ItemControls = (item, url) => {
   header.classList.add('item-controls__header');
   dom.appendChild(header);
 
-  if (item.type === 'dir') {
-
-    const addFileButton = IconButton(['fas', 'fa-plus']);
-    addFileButton.addEventListener('click', (e) => {
+    function clearContent() {
       if (content) {
         dom.removeChild(content);
         content = null;
       }
+    }
+
+  if (item.type === 'dir') {
+
+    const addFileButton = IconButton(['fas', 'fa-plus']);
+    addFileButton.addEventListener('click', (e) => {
+
+      clearContent();
 
       content = TextFileEditor();
       content.addEventListener('save', (e) => {
@@ -352,12 +358,33 @@ const ItemControls = (item, url) => {
         }
       });
       content.addEventListener('exit', (e) => {
-        dom.removeChild(content);
-        content = null;
+        clearContent();
       });
       dom.appendChild(content);
     });
     header.appendChild(addFileButton);
+
+    const newFolderButton = NewFolderButton();
+    newFolderButton.addEventListener('click', (e) => {
+      clearContent();
+
+      function submit(name) {
+        dom.dispatchEvent(new CustomEvent('create-folder', {
+          bubbles: true,
+          detail: {
+            path: [...path, name],
+          },
+        }));
+
+        clearContent();
+      }
+
+      const cancel = clearContent;
+
+      content = NewFolderNameInput('/', submit, cancel);
+      dom.appendChild(content);
+    });
+    header.appendChild(newFolderButton);
   }
   else if (item.type === 'file') {
     const openExternalButton = OpenExternalButton(url);
@@ -383,10 +410,7 @@ const ItemControls = (item, url) => {
 
   const uploadButton = IconButton(['fas', 'fa-cloud-upload-alt']);
   uploadButton.addEventListener('click', (e) => {
-    if (content) {
-      dom.removeChild(content);
-      content = null;
-    }
+    clearContent();
 
     content = h('.upload-chooser',
       h('button',
@@ -395,8 +419,7 @@ const ItemControls = (item, url) => {
             dom.dispatchEvent(new CustomEvent('choose-upload-files', {
               bubbles: true,
             }));
-            dom.removeChild(content);
-            content = null;
+            clearContent();
           }
         },
         "File(s)",
@@ -407,8 +430,7 @@ const ItemControls = (item, url) => {
             dom.dispatchEvent(new CustomEvent('choose-upload-folder', {
               bubbles: true,
             }));
-            dom.removeChild(content);
-            content = null;
+            clearContent();
           }
         },
         "Folder",
@@ -460,6 +482,55 @@ const InvisibleFolderInput = (path) => {
   folderInput.setAttribute('webkitdirectory', true);
   folderInput.setAttribute('mozdirectory', true);
   return folderInput;
+};
+
+const NewFolderNameInput = (parentPath, onSubmit, onCancel) => {
+  const dom = document.createElement('div');
+  dom.classList.add('new-folder-name-input');
+  const prompt = document.createElement('div');
+  prompt.innerText = `Creating new folder in ${parentPath}/`;
+  dom.appendChild(prompt);
+  dom.appendChild(NameInput(onSubmit, onCancel));
+  return dom;
+};
+
+const NameInput = (onSubmit, onCancel) => {
+  const nameInput = document.createElement('div');
+  nameInput.classList.add('name-input');
+
+  const promptText = document.createElement('div');
+  promptText.innerText = "Enter name:";
+  nameInput.appendChild(promptText);
+
+  let text = "";
+
+  const namerText = document.createElement('input');
+  namerText.setAttribute('type', 'text');
+  namerText.addEventListener('keyup', (e) => {
+    text = e.target.value;
+  });
+  nameInput.appendChild(namerText);
+
+  const submitButton = document.createElement('button');
+  submitButton.innerText = "Submit";
+  submitButton.addEventListener('click', (e) => {
+    if (text.length > 0) {
+      onSubmit(text);
+    }
+    else {
+      alert("must enter a name to submit");
+    }
+  });
+  nameInput.appendChild(submitButton);
+
+  const cancelButton = document.createElement('button');
+  cancelButton.innerText = "Cancel";
+  cancelButton.addEventListener('click', (e) => {
+    onCancel();
+  });
+  nameInput.appendChild(cancelButton);
+
+  return nameInput;
 };
 
 export {
