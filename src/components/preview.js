@@ -64,7 +64,7 @@ const Preview = () => {
                 {
                   path: vnode.attrs.path,
                   data: vnode.attrs.data,
-                  appState: vnode.attrs.appState,
+                  remoAddr: vnode.attrs.remoAddr,
                 },
               ),
             );

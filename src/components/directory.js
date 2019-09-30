@@ -18,7 +18,7 @@ const DirectoryAdapter = () => {
     },
 
     oncreate: (vnode) => {
-      vnode.dom.appendChild(ReinDirectory(vnode.attrs.path, vnode.attrs.data, vnode.attrs.appState));
+      vnode.dom.appendChild(ReinDirectory(vnode.attrs.path, vnode.attrs.data, vnode.attrs.remoAddr));
     },
 
     view: (vnode) => {
@@ -28,7 +28,7 @@ const DirectoryAdapter = () => {
 };
 
 
-const ReinDirectory = (path, data, renderState) => {
+const ReinDirectory = (path, data, renderState, remoAddr) => {
   // this is used to achieve a "natural sort". see
   // https://stackoverflow.com/a/38641281/943814
   const naturalSorter = new Intl.Collator(undefined, {
@@ -44,7 +44,7 @@ const ReinDirectory = (path, data, renderState) => {
 
   const itemsElem = h('.directory__items',
     sortedNames.map((name) => {
-      return ItemMithrilAdapter(path.concat([name]), data[name], renderState);
+      return ItemMithrilAdapter(path.concat([name]), data[name], renderState, remoAddr);
     }),
   );
 
@@ -67,7 +67,7 @@ const ReinDirectory = (path, data, renderState) => {
     const index = sortedNames.indexOf(name);
 
     if (index > -1) {
-      itemsElem.insertBefore(ItemMithrilAdapter(path.concat([name]), data[name], renderState), itemsElem.childNodes[index]);
+      itemsElem.insertBefore(ItemMithrilAdapter(path.concat([name]), data[name], renderState, remoAddr), itemsElem.childNodes[index]);
     }
     else {
       throw new Error("Directory DOM insert fail");
@@ -85,31 +85,18 @@ const ReinDirectory = (path, data, renderState) => {
 };
 
 
-const ItemMithrilAdapter = (path, data, appState) => {
+const ItemMithrilAdapter = (path, data, remoAddr) => {
 
   const dom = h('.item-mithril-adapter');
-
-  const name = path[path.length - 1];
 
   function Wrapper() {
     return {
       view: (vnode) => {
         return m(Item,
           {
-            state: data,
-            appState,
             path,
-            remoAddr: appState.remoAddr,
-            name,
             data,
-            onDelete: () => {
-              dom.dispatchEvent(new CustomEvent('delete-item', {
-                bubbles: true,
-                detail: {
-                  path,
-                },
-              }));
-            },
+            remoAddr,
           }
         )
       },
@@ -215,9 +202,9 @@ const Item = () => {
 
     view: (vnode) => {
 
-      const name = vnode.attrs.name;
       const type = vnode.attrs.data.type;
       path = vnode.attrs.path;
+      const name = path[path.length - 1];
       const pathStr = path.join('/')
       const url = encodeURI(vnode.attrs.remoAddr + '/' + pathStr);
       const item = vnode.attrs.data;
@@ -281,7 +268,7 @@ const Item = () => {
         m('.item__settings',
           m(ItemSettingsAdapter,
             {
-              data: vnode.attrs.state,
+              data: vnode.attrs.data,
               renderState: renderState.settings,
             },
           ),
@@ -293,8 +280,7 @@ const Item = () => {
             name,
             url,
             path: vnode.attrs.path,
-            data: vnode.attrs.state.children,
-            appState: vnode.attrs.appState,
+            data: vnode.attrs.data.children,
           },
         ),
       );
@@ -535,4 +521,5 @@ const NameInput = (onSubmit, onCancel) => {
 
 export {
   DirectoryAdapter,
+  Item,
 };
