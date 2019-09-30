@@ -398,6 +398,38 @@ const ItemControls = (item, url, path) => {
       dom.appendChild(content);
     });
     header.appendChild(newFolderButton);
+
+    const uploadButton = IconButton(['fas', 'fa-cloud-upload-alt']);
+    uploadButton.addEventListener('click', (e) => {
+      clearContent();
+
+      content = h('.upload-chooser',
+        h('button',
+          {
+            onclick: (e) => {
+              dom.dispatchEvent(new CustomEvent('choose-upload-files', {
+                bubbles: true,
+              }));
+              clearContent();
+            }
+          },
+          "File(s)",
+        ),
+        h('button',
+          {
+            onclick: (e) => {
+              dom.dispatchEvent(new CustomEvent('choose-upload-folder', {
+                bubbles: true,
+              }));
+              clearContent();
+            }
+          },
+          "Folder",
+        ),
+      );
+      dom.appendChild(content);
+    });
+    header.appendChild(uploadButton);
   }
   else if (item.type === 'file') {
     const openExternalButton = OpenExternalButton(url);
@@ -421,37 +453,7 @@ const ItemControls = (item, url, path) => {
   });
   header.appendChild(permButton);
 
-  const uploadButton = IconButton(['fas', 'fa-cloud-upload-alt']);
-  uploadButton.addEventListener('click', (e) => {
-    clearContent();
-
-    content = h('.upload-chooser',
-      h('button',
-        {
-          onclick: (e) => {
-            dom.dispatchEvent(new CustomEvent('choose-upload-files', {
-              bubbles: true,
-            }));
-            clearContent();
-          }
-        },
-        "File(s)",
-      ),
-      h('button',
-        {
-          onclick: (e) => {
-            dom.dispatchEvent(new CustomEvent('choose-upload-folder', {
-              bubbles: true,
-            }));
-            clearContent();
-          }
-        },
-        "Folder",
-      ),
-    );
-    dom.appendChild(content);
-  });
-  header.appendChild(uploadButton);
+  
 
   const downloadLink = DownloadButton(item.type, url);
   header.appendChild(downloadLink);
