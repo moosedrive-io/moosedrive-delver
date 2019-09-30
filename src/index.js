@@ -3,7 +3,7 @@ import { decodeObject } from 'omnistreams';
 import {
   DeleteButton, UploadButton, UploadButtonNew, NewFolderButton
 } from './components/buttons.js';
-import { DirectoryAdapter, Item } from './components/directory.js';
+import { DirectoryAdapter, ItemContentMithril } from './components/directory.js';
 import m from 'mithril';
 import rein from 'rein-state';
 
@@ -149,10 +149,12 @@ const Home = () => {
             }),
           ),
           m('.main__directory',
-            m(DirectoryAdapter,
+            m(ItemContentMithril,
+            //m(DirectoryAdapter,
               {
                 path: [],
-                data: reinstate.root.children,
+                //data: reinstate.root.children,
+                data: reinstate.root,
                 remoAddr: appState.remoAddr,
               },
             ),

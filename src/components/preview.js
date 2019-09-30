@@ -4,9 +4,33 @@ import { DirectoryAdapter } from './directory.js';
 import { TextFileEditor } from './text_editor.js';
 
 
-const Preview = () => {
+const Preview = (path, data, remoAddr) => {
+  const dom = document.createElement('div');
+  dom.classList.add('preview');
+
+  function Wrapper() {
+      return {
+        view: (vnode) => {
+          return m(PreviewMithril,
+            {
+              state: 'expanded',
+              path,
+              data,
+              remoAddr,
+            }
+          )
+        },
+      };
+    }
+
+  m.mount(dom, Wrapper);
+  return dom;
+};
+
+const PreviewMithril = () => {
   return {
     oncreate: (vnode) => {
+
       vnode.dom.addEventListener('save', (e) => {
         e.stopPropagation();
 
@@ -14,7 +38,7 @@ const Preview = () => {
           bubbles: true,
           detail: {
             path: vnode.attrs.path,
-            filename: vnode.attrs.name,
+            filename: vnode.attrs.path[vnode.attrs.path.length - 1],
             text: e.detail.text,
           },
         }));
@@ -25,23 +49,24 @@ const Preview = () => {
 
       let previewContent = null;
 
+      const pathStr = vnode.attrs.path.join('/');
+      const url = encodeURI(vnode.attrs.remoAddr + '/' + pathStr);
+
       switch (vnode.attrs.state) {
         case 'minimized':
           previewContent = null;
           break;
         case 'expanded': {
 
+          const mime = getMime(vnode.attrs.path[vnode.attrs.path.length - 1]);
 
-          const mime = getMime(vnode.attrs.name);
-
-
-          if (vnode.attrs.type === 'file') {
+          if (vnode.attrs.data.type === 'file') {
 
             if (mime && mime.startsWith('image/')) {
               previewContent = m('.item__preview__image__container',
                 m('img.item__preview__image',
                   {
-                    src: vnode.attrs.url,
+                    src: url,
                   },
                 ),
               );
@@ -51,7 +76,7 @@ const Preview = () => {
               previewContent = m('.item__preview__text',
                 m(TextPreview,
                   {
-                    url: vnode.attrs.url,
+                    url,
                     path: vnode.attrs.path,
                   },
                 ),
@@ -63,7 +88,7 @@ const Preview = () => {
               m(DirectoryAdapter,
                 {
                   path: vnode.attrs.path,
-                  data: vnode.attrs.data,
+                  data: vnode.attrs.data.children,
                   remoAddr: vnode.attrs.remoAddr,
                 },
               ),
@@ -118,4 +143,8 @@ const TextPreview = () => {
     },
   };
 };
-export { Preview };
+
+export {
+  Preview,
+  PreviewMithril
+};

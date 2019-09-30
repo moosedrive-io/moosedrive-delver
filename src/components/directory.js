@@ -2,7 +2,7 @@ import m from 'mithril';
 import h from 'hyperscript';
 import rein from 'rein-state';
 import { OpenExternalButton, NewFolderButton, DownloadButton, IconButton } from './buttons.js';
-import { Preview } from './preview.js';
+import { Preview, PreviewMithril } from './preview.js';
 import { ItemSettings } from './item_settings.js';
 import { TextFileEditor } from './text_editor.js';
 import { getType as getMime } from 'mime';
@@ -28,7 +28,7 @@ const DirectoryAdapter = () => {
 };
 
 
-const ReinDirectory = (path, data, renderState, remoAddr) => {
+const ReinDirectory = (path, data, remoAddr) => {
   // this is used to achieve a "natural sort". see
   // https://stackoverflow.com/a/38641281/943814
   const naturalSorter = new Intl.Collator(undefined, {
@@ -44,7 +44,7 @@ const ReinDirectory = (path, data, renderState, remoAddr) => {
 
   const itemsElem = h('.directory__items',
     sortedNames.map((name) => {
-      return ItemMithrilAdapter(path.concat([name]), data[name], renderState, remoAddr);
+      return ItemMithrilAdapter(path.concat([name]), data[name], remoAddr);
     }),
   );
 
@@ -67,7 +67,7 @@ const ReinDirectory = (path, data, renderState, remoAddr) => {
     const index = sortedNames.indexOf(name);
 
     if (index > -1) {
-      itemsElem.insertBefore(ItemMithrilAdapter(path.concat([name]), data[name], renderState, remoAddr), itemsElem.childNodes[index]);
+      itemsElem.insertBefore(ItemMithrilAdapter(path.concat([name]), data[name], remoAddr), itemsElem.childNodes[index]);
     }
     else {
       throw new Error("Directory DOM insert fail");
@@ -273,14 +273,12 @@ const Item = () => {
             },
           ),
         ),
-        m(Preview,
+        m(PreviewMithril,
           {
             state,
-            type,
-            name,
-            url,
             path: vnode.attrs.path,
-            data: vnode.attrs.data.children,
+            data: vnode.attrs.data,
+            remoAddr: vnode.attrs.remoAddr,
           },
         ),
       );
@@ -304,6 +302,35 @@ const ItemControlsMithril = () => {
       return m('.item-controls-mithril');
     }
   };
+};
+
+const ItemContentMithril = () => {
+  return {
+    onbeforeupdate: (vnode) => {
+      // mithril should ignore this component
+      return false;
+    },
+
+    oncreate: (vnode) => {
+      vnode.dom.appendChild(ItemContent(vnode.attrs.path, vnode.attrs.data, vnode.attrs.remoAddr));
+    },
+
+    view: (vnode) => {
+      return m('.item-content-mithril');
+    }
+  };
+};
+
+const ItemContent = (path, data, remoAddr) => {
+  const dom = document.createElement('div');
+  dom.classList.add('item-content');
+
+  const pathStr = path.join('/')
+  const url = encodeURI(remoAddr + '/' + pathStr);
+
+  dom.appendChild(ItemControls(data, url, path));
+  dom.appendChild(Preview(path, data, remoAddr));
+  return dom;
 };
 
 
@@ -522,4 +549,5 @@ const NameInput = (onSubmit, onCancel) => {
 export {
   DirectoryAdapter,
   Item,
+  ItemContentMithril,
 };
