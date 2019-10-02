@@ -212,6 +212,16 @@
   max-height: var(--preview-height);
 }
 
+.confirm-input {
+  display: flex;
+  justify-content: right;
+}
+
+.upload-chooser {
+  display: flex;
+  justify-content: right;
+}
+
 /*
 .preview-header__btn {
   background-color: var(--background-color);
