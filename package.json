@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "hyperscript": "^2.0.2",
+    "marked": "^0.7.0",
     "mime": "^2.4.4",
     "mithril": "^2.0.0-rc.6",
     "normalize.css": "^8.0.1",

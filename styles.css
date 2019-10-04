@@ -1,7 +1,7 @@
 :root {
   --text-color: #000000;
   --background-color: #ffffff;
-  --preview-height: 50vh;
+  --preview-height: 60vh;
   --main-max-width: 960px;
   --control-bar-height: 40px;
   --hover-color: #cccccc;
@@ -210,6 +210,11 @@
 .item__preview__image {
   max-width: 100%; 
   max-height: var(--preview-height);
+}
+
+.markdown-preview-mithril {
+  max-height: var(--preview-height);
+  overflow: scroll;
 }
 
 .confirm-input {

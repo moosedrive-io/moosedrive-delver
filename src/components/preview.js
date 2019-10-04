@@ -2,6 +2,7 @@ import m from 'mithril';
 import { getType as getMime } from 'mime';
 import { DirectoryAdapter } from './directory.js';
 import { TextFileEditor } from './text_editor.js';
+import marked from 'marked';
 
 
 const Preview = (path, data, remoAddr) => {
@@ -60,6 +61,9 @@ const PreviewMithril = () => {
 
           const mime = getMime(vnode.attrs.path[vnode.attrs.path.length - 1]);
 
+          // TODO: note that we can't set a max height for
+          // item__preview__content__directory, so we're setting all the others
+          // individually. Should clean that up
           if (vnode.attrs.data.type === 'file') {
 
             if (mime && mime.startsWith('image/')) {
@@ -69,6 +73,13 @@ const PreviewMithril = () => {
                     src: url,
                   },
                 ),
+              );
+            }
+            else if (mime && mime === 'text/markdown') {
+              previewContent = m(MarkdownPreviewMithril,
+                {
+                  url,
+                }
               );
             }
             // default to assuming text
@@ -109,6 +120,29 @@ const PreviewMithril = () => {
           previewContent,
         ),
       );
+    },
+  };
+};
+
+
+const MarkdownPreviewMithril = () => {
+  return {
+    onbeforeupdate: (vnode) => {
+      // mithril should ignore this component
+      return false;
+    },
+
+    oncreate: async (vnode) => {
+      const response = await fetch(vnode.attrs.url);
+      const text = await response.text();
+
+      const content = document.createElement('div');
+      content.innerHTML = marked(text);
+      vnode.dom.appendChild(content);
+    },
+
+    view: (vnode) => {
+      return m('.markdown-preview-mithril');
     },
   };
 };
