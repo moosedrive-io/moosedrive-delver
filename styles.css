@@ -1,7 +1,7 @@
 :root {
   --text-color: #000000;
   --background-color: #ffffff;
-  --preview-height: 300px;
+  --preview-height: 50vh;
   --main-max-width: 960px;
   --control-bar-height: 40px;
   --hover-color: #cccccc;
