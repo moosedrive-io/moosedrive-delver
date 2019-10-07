@@ -107,7 +107,7 @@ const Home = () => {
           m.redraw();
         });
 
-        const manfs = new EventSource('/manfs?updates=true');
+        const manfs = new EventSource('/manfs?subscribe=true');
 
         manfs.addEventListener('message', (e) => {
           const message = JSON.parse(e.data);
