@@ -17,6 +17,56 @@ const State = {
 
 let reinstate;
 
+
+function handleManfsUpdate(update, reinstate) {
+  let curPath = reinstate.root;
+  let parentItem;
+
+  function newObj(path) {
+    const obj = {};
+
+    let cur = obj;
+    for (const part of path) {
+      cur[part] = {};
+      cur = cur[part];
+    }
+
+    return obj;
+  }
+
+  const path = parsePath(update.path);
+
+  while (path.length > 1) {
+    const part = path[0];
+
+    // TODO: broken
+    //if (!curPath[part]) {
+    //  curPath[part] = rein.fromObject(newObj(path.slice(1)));
+    //}
+
+    parentItem = curPath;
+    curPath = curPath.children[part];
+    path.shift();
+  }
+
+  const key = path[path.length - 1]; 
+
+  //if (data.action.type === 'update') {
+  //  curPath[key] = data.action.value;
+  //}
+  //else if (data.action.type === 'append') {
+  //  curPath[key].push(data.action.viewerId);
+  //}
+  //else if (data.action.type === 'add') {
+  //  curPath[key] = data.action.newFile;
+  //}
+  if (update.type === 'delete') {
+    delete curPath.children[key];
+  }
+
+  m.redraw();
+}
+
 const Home = () => {
 
   const appState = rein.fromObject({
@@ -55,6 +105,20 @@ const Home = () => {
 
         State.client.onReinUpdate(() => {
           m.redraw();
+        });
+
+        const manfs = new EventSource('/manfs?updates=true');
+
+        manfs.addEventListener('message', (e) => {
+          const message = JSON.parse(e.data);
+          console.log("message", message);
+        });
+
+        manfs.addEventListener('delete', (e) => {
+          const message = JSON.parse(e.data);
+          console.log("delete", message);
+          message.type = 'delete';
+          handleManfsUpdate(message, reinstate);
         });
 
         //const metaStream = await State.client.getMetaStream('/');
