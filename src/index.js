@@ -18,7 +18,12 @@ const State = {
 let reinstate;
 
 
-function handleManfsUpdate(update, reinstate) {
+function handleManfsUpdate(message, reinstate) {
+
+  const update = JSON.parse(message);
+
+  console.log(update);
+
   let curPath = reinstate.root;
   let parentItem;
 
@@ -51,16 +56,20 @@ function handleManfsUpdate(update, reinstate) {
 
   const key = path[path.length - 1]; 
 
+  // TODO: need to make sure we're merging properly. If a folder is updated, we
+  // shouldn't just replace it in reinstate, because it's nested state might
+  // still be valid
+
   //if (data.action.type === 'update') {
   //  curPath[key] = data.action.value;
   //}
   //else if (data.action.type === 'append') {
   //  curPath[key].push(data.action.viewerId);
   //}
-  //else if (data.action.type === 'add') {
-  //  curPath[key] = data.action.newFile;
-  //}
-  if (update.type === 'delete') {
+  if (update.type === 'create') {
+    curPath.children[key] = update.meta;
+  }
+  else if (update.type === 'delete') {
     delete curPath.children[key];
   }
 
@@ -114,12 +123,18 @@ const Home = () => {
           console.log("message", message);
         });
 
-        manfs.addEventListener('delete', (e) => {
-          const message = JSON.parse(e.data);
-          console.log("delete", message);
-          message.type = 'delete';
-          handleManfsUpdate(message, reinstate);
+        manfs.addEventListener('create', (e) => {
+          handleManfsUpdate(e.data, reinstate);
         });
+
+        manfs.addEventListener('delete', (e) => {
+          handleManfsUpdate(e.data, reinstate);
+        });
+
+        manfs.addEventListener('update', (e) => {
+          handleManfsUpdate(e.data, reinstate);
+        });
+
 
         //const metaStream = await State.client.getMetaStream('/');
 
