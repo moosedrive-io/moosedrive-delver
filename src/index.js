@@ -18,11 +18,15 @@ const State = {
 let reinstate;
 
 
-function handleManfsUpdate(message, reinstate) {
+function handleManfsUpdate(message) {
 
   const update = JSON.parse(message);
 
   console.log(update);
+
+  if (!reinstate) {
+    reinstate = rein.fromObject({ root: update.meta });
+  }
 
   let curPath = reinstate.root;
   let parentItem;
@@ -110,12 +114,6 @@ const Home = () => {
           .secure(secure)
           .build();
 
-        reinstate = await State.client.getReinstate();
-
-        State.client.onReinUpdate(() => {
-          m.redraw();
-        });
-
         const manfs = new EventSource('/manfs?subscribe=true');
 
         manfs.addEventListener('message', (e) => {
@@ -124,25 +122,16 @@ const Home = () => {
         });
 
         manfs.addEventListener('create', (e) => {
-          handleManfsUpdate(e.data, reinstate);
+          handleManfsUpdate(e.data);
         });
 
         manfs.addEventListener('delete', (e) => {
-          handleManfsUpdate(e.data, reinstate);
+          handleManfsUpdate(e.data);
         });
 
         manfs.addEventListener('update', (e) => {
-          handleManfsUpdate(e.data, reinstate);
+          handleManfsUpdate(e.data);
         });
-
-
-        //const metaStream = await State.client.getMetaStream('/');
-
-        //metaStream.onData((data) => {
-        //  console.log(data);
-        //  metaStream.request(1);
-        //});
-        //metaStream.request(10);
 
       })();
     },
