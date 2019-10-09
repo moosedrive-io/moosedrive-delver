@@ -17,8 +17,7 @@ const ItemSettings = (data, renderState) => {
     content,
   );
 
-  rein.onUpdated(renderState, 'selected', () => {
-
+  function render() {
     switch (renderState.selected) {
       case 'permissions':
 
@@ -61,6 +60,12 @@ const ItemSettings = (data, renderState) => {
         content = dummyContent;
         break;
     }
+  }
+
+  render();
+
+  rein.onUpdated(renderState, 'selected', () => {
+    render();
   });
 
   return dom;
@@ -151,8 +156,6 @@ const PermissionsEdit = (state) => {
 
 
 const PublicViewSelector = (state) => {
-
-  console.log("PublicViewSelector state", state);
 
   const s = h('span.s', 
     "S"

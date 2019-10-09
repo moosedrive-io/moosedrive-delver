@@ -60,13 +60,13 @@ function handleManfsUpdate(message, reinstate) {
   // shouldn't just replace it in reinstate, because it's nested state might
   // still be valid
 
-  //if (data.action.type === 'update') {
-  //  curPath[key] = data.action.value;
-  //}
   //else if (data.action.type === 'append') {
   //  curPath[key].push(data.action.viewerId);
   //}
   if (update.type === 'create') {
+    curPath.children[key] = update.meta;
+  }
+  else if (update.type === 'update') {
     curPath.children[key] = update.meta;
   }
   else if (update.type === 'delete') {

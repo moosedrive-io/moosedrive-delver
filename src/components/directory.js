@@ -27,25 +27,52 @@ const DirectoryAdapter = () => {
   };
 };
 
+// this is used to achieve a "natural sort". see
+// https://stackoverflow.com/a/38641281/943814
+const naturalSorter = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: 'base'
+});
 
-const ReinDirectory = (path, data, remoAddr) => {
-  // this is used to achieve a "natural sort". see
-  // https://stackoverflow.com/a/38641281/943814
-  const naturalSorter = new Intl.Collator(undefined, {
-    numeric: true,
-    sensitivity: 'base'
+function genSortedItems(data) {
+  return Object.keys(data)
+    .sort(naturalSorter.compare)
+    .map(name => ({
+      name,
+      state: makeItemState(),
+    }));
+}
+
+function makeItemState() {
+  return rein.fromObject({
+    settings: {
+      selected: false,
+    },
+    visualState: 'minimized',
+  });
+}
+
+function newItem(path, data, item, remoAddr) {
+  const wrapper = h('.directory__items__item');
+  const itemElem = ItemMithrilAdapter(path.concat([item.name]), data[item.name], item.state, remoAddr);
+  wrapper.appendChild(itemElem);
+
+  rein.onUpdated(data, item.name, () => {
+    const oldElem = wrapper.childNodes[0];
+    const newElem = ItemMithrilAdapter(path.concat([item.name]), data[item.name], item.state, remoAddr);
+    wrapper.replaceChild(newElem, oldElem);
   });
 
-  let sortedNames = Object.keys(data).sort(naturalSorter.compare);
+  return wrapper;
+}
 
-  //const Item = (name) => {
-  //  return h('.item', name);
-  //};
+
+const ReinDirectory = (path, data, remoAddr) => {
+
+  let sortedItems = genSortedItems(data);
 
   const itemsElem = h('.directory__items',
-    sortedNames.map((name) => {
-      return ItemMithrilAdapter(path.concat([name]), data[name], remoAddr);
-    }),
+    sortedItems.map((item) => newItem(path, data, item, remoAddr)),
   );
 
   const dom = h('.directory',
@@ -62,12 +89,20 @@ const ReinDirectory = (path, data, remoAddr) => {
 
     // TODO: could do a binary insertion to be more efficient, rather than
     // resorting the whole list
-    sortedNames = Object.keys(data).sort(naturalSorter.compare);
+    const sortedNames = Object.keys(data).sort(naturalSorter.compare);
 
-    const index = sortedNames.indexOf(name);
+    let index = sortedNames.indexOf(name);
 
     if (index > -1) {
-      itemsElem.insertBefore(ItemMithrilAdapter(path.concat([name]), data[name], remoAddr), itemsElem.childNodes[index]);
+      sortedItems = sortedItems.slice(0, index)
+        .concat([{ name, state: makeItemState() }])
+        .concat(sortedItems.slice(index));
+
+      const item = sortedItems[index];
+
+      itemsElem.insertBefore(
+        newItem(path, data, item, remoAddr),
+        itemsElem.childNodes[index]);
     }
     else {
       throw new Error("Directory DOM insert fail");
@@ -76,8 +111,13 @@ const ReinDirectory = (path, data, remoAddr) => {
 
   rein.onDelete(data, (name) => {
 
-    const index = sortedNames.indexOf(name);
-    sortedNames.splice(index, 1);
+    let index = -1;
+    for (let i = 0; i < sortedItems.length; i++) {
+      if (sortedItems[i].name === name) {
+        index = i;
+      }
+    }
+    sortedItems.splice(index, 1);
     itemsElem.removeChild(itemsElem.childNodes[index]);
   });
 
@@ -85,7 +125,7 @@ const ReinDirectory = (path, data, remoAddr) => {
 };
 
 
-const ItemMithrilAdapter = (path, data, remoAddr) => {
+const ItemMithrilAdapter = (path, data, state, remoAddr) => {
 
   const dom = h('.item-mithril-adapter');
 
@@ -96,6 +136,7 @@ const ItemMithrilAdapter = (path, data, remoAddr) => {
           {
             path,
             data,
+            state,
             remoAddr,
           }
         )
@@ -110,19 +151,14 @@ const ItemMithrilAdapter = (path, data, remoAddr) => {
 
 const Item = () => {
 
-  let state = 'minimized';
   let settingsSelected = null;
   let path;
-
-  const renderState = rein.fromObject({
-    settings: {
-      selected: false,
-    },
-  });
 
   return {
 
     oncreate: (vnode) => {
+
+      const renderState = vnode.attrs.state;
 
       const uppie = new Uppie();
 
@@ -172,7 +208,7 @@ const Item = () => {
       });
 
       vnode.dom.addEventListener('exit', (e) => {
-        state = 'minimized';
+        renderState.visualState = 'minimized';
         m.redraw();
         e.stopPropagation();
       });
@@ -209,6 +245,8 @@ const Item = () => {
       const url = encodeURI(vnode.attrs.remoAddr + '/' + pathStr);
       const item = vnode.attrs.data;
 
+      const renderState = vnode.attrs.state;
+
       let icon;
       if (type === 'file') {
         icon = 'i.fas.fa-file';
@@ -217,13 +255,13 @@ const Item = () => {
         icon = 'i.fas.fa-folder';
       }
 
-      const headerClasses = '.item__header' + (state === 'expanded' ? '.item__header--expanded' : '');
+      const headerClasses = '.item__header' + (renderState.visualState === 'expanded' ? '.item__header--expanded' : '');
 
       return m('.item',
         m(headerClasses,
           { 
             onclick: (e) => {
-              state = state === 'minimized' ? 'expanded' : 'minimized';
+              renderState.visualState = renderState.visualState === 'minimized' ? 'expanded' : 'minimized';
             },
           },
           m('input.item__checkbox', 
@@ -256,7 +294,7 @@ const Item = () => {
             null
           ),
         ),
-        state === 'expanded' ? m(ItemControlsMithril,
+        renderState.visualState === 'expanded' ? m(ItemControlsMithril,
           {
             item,
             url,
@@ -275,7 +313,7 @@ const Item = () => {
         ),
         m(PreviewMithril,
           {
-            state,
+            state: renderState.visualState,
             path: vnode.attrs.path,
             data: vnode.attrs.data,
             remoAddr: vnode.attrs.remoAddr,
@@ -547,6 +585,7 @@ const NameInput = (onSubmit, onCancel) => {
 
   return nameInput;
 };
+
 
 export {
   DirectoryAdapter,
