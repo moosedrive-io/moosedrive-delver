@@ -1,252 +1,180 @@
-import m from 'mithril';
 import h from 'hyperscript';
 import { OpenExternalButton, NewFolderButton, DownloadButton, IconButton } from './buttons.js';
-import { Preview, PreviewMithril } from './preview.js';
+import { Preview } from './preview.js';
 import Uppie from 'uppie';
 import { ItemSettings } from './item_settings.js';
 import { TextFileEditor } from './text_editor.js';
 
 
-const ItemMithrilAdapter = (path, data, state, remoAddr) => {
+const Item = (path, data, state, remoAddr) => {
 
-  const dom = h('.item-mithril-adapter');
+  let settingsSelected = null;
 
-  function Wrapper() {
-    return {
-      view: (vnode) => {
-        return m(Item,
-          {
-            path,
-            data,
-            state,
-            remoAddr,
-          }
-        )
-      },
-    };
+  const dom = document.createElement('div');
+  const renderState = state;
+
+  const uppie = new Uppie();
+
+  const handleFiles = async (e, formData, filenames) => {
+    for (const param of formData) {
+      const file = param[1];
+
+      const filenameParts = file.name.split('/');
+      const dir = [...path, ...filenameParts.slice(0, -1)];
+      const filename = filenameParts[filenameParts.length - 1];
+      dom.dispatchEvent(new CustomEvent('upload-file', {
+        bubbles: true,
+        detail: {
+          path,
+          file,
+        },
+      }));
+    }
+  };
+
+  const fileInput = InvisibleFileInput(path);
+  uppie(fileInput, handleFiles);
+  dom.appendChild(fileInput);
+  
+  const folderInput = InvisibleFolderInput(path);
+  uppie(folderInput, handleFiles);
+  dom.appendChild(folderInput);
+
+
+  dom.addEventListener('set-public-view', (e) => {
+    // modify the event in place
+    if (e.detail.path === undefined) {
+      e.detail.path = path;
+    }
+  });
+
+  dom.addEventListener('add-viewer', (e) => {
+    if (e.detail.path === undefined) {
+      e.detail.path = path;
+    }
+  });
+
+  dom.addEventListener('upload-text-file', (e) => {
+    if (e.detail.path === undefined) {
+      e.detail.path = [...path, e.detail.filename];
+    }
+  });
+
+  dom.addEventListener('exit', (e) => {
+    e.stopPropagation();
+    renderState.visualState = 'minimized';
+    render();
+  });
+
+  dom.addEventListener('permissions-selected', (e) => {
+    settingsSelected = settingsSelected === 'permissions' ? null : 'permissions';
+    renderState.settings.selected = renderState.settings.selected === 'permissions' ? null : 'permissions';
+    e.stopPropagation();
+  });
+
+  dom.addEventListener('tags-selected', (e) => {
+    renderState.settings.selected = renderState.settings.selected === 'tags' ? null : 'tags';
+    e.stopPropagation();
+  });
+
+  dom.addEventListener('choose-upload-files', (e) => {
+    
+    fileInput.click();
+    e.stopPropagation();
+  });
+
+  dom.addEventListener('choose-upload-folder', (e) => {
+    folderInput.click();
+    e.stopPropagation();
+  });
+
+  dom.addEventListener('item-header-clicked', (e) => {
+    e.stopPropagation();
+    render();
+  });
+
+
+  const type = data.type;
+  const name = path[path.length - 1];
+  const pathStr = path.join('/')
+  const url = encodeURI(remoAddr + '/' + pathStr);
+  const item = data;
+
+  let icon;
+  if (type === 'file') {
+    icon = 'i.fas.fa-file';
+  }
+  else {
+    icon = 'i.fas.fa-folder';
   }
 
-  m.mount(dom, Wrapper);
+  function render() {
+
+    const headerClasses = '.item__header' + (renderState.visualState === 'expanded' ? '.item__header--expanded' : '');
+
+    const content = h('.item',
+      h(headerClasses,
+        { 
+          onclick: (e) => {
+            renderState.visualState = renderState.visualState === 'minimized' ? 'expanded' : 'minimized';
+
+            dom.dispatchEvent(new CustomEvent('item-header-clicked', {
+              bubbles: true,
+            }));
+          },
+        },
+        h('input.item__checkbox', 
+          {
+            type: 'checkbox',
+            onclick: (e) => {
+              e.stopPropagation();
+            },
+            onchange: (e) => {
+              dom.dispatchEvent(new CustomEvent('item-check-changed', {
+                bubbles: true,
+                detail: {
+                  path,
+                  checked: e.target.checked,
+                  item,
+                },
+              }));
+            },
+          }),
+        h(icon),
+        h('span.item__name', name),
+        h('span.item__public-icon',
+          item.permissions && item.permissions.publicView ?
+          h('i.fas.fa-eye',
+            {
+              title: "Publicly visible",
+            }
+          )
+          :
+          null
+        ),
+      ),
+      //renderState.visualState === 'expanded' ? ItemControls(item, url, path)
+      renderState.visualState === 'expanded' ? ItemContent(path, item, remoAddr)
+      :
+      null,
+      h('.item__settings',
+        ItemSettings(data, renderState.settings),
+      ),
+    );
+
+    if (dom.childNodes[0]) {
+      dom.replaceChild(content, dom.childNodes[0]);
+    }
+    else {
+      dom.appendChild(content);
+    }
+  }
+
+  render();
 
   return dom;
 };
 
-const Item = () => {
-
-  let settingsSelected = null;
-  let path;
-
-  return {
-
-    oncreate: (vnode) => {
-
-      const dom = vnode.dom;
-      const state = vnode.attrs.state;
-      const path = vnode.attrs.path;
-
-      const renderState = state;
-
-      const uppie = new Uppie();
-
-      const handleFiles = async (e, formData, filenames) => {
-        for (const param of formData) {
-          const file = param[1];
-
-          const filenameParts = file.name.split('/');
-          const dir = [...path, ...filenameParts.slice(0, -1)];
-          const filename = filenameParts[filenameParts.length - 1];
-          dom.dispatchEvent(new CustomEvent('upload-file', {
-            bubbles: true,
-            detail: {
-              path,
-              file,
-            },
-          }));
-        }
-      };
-
-      const fileInput = InvisibleFileInput(path);
-      uppie(fileInput, handleFiles);
-      dom.appendChild(fileInput);
-      
-      const folderInput = InvisibleFolderInput(path);
-      uppie(folderInput, handleFiles);
-      dom.appendChild(folderInput);
-
-
-      dom.addEventListener('set-public-view', (e) => {
-        // modify the event in place
-        if (e.detail.path === undefined) {
-          e.detail.path = path;
-        }
-      });
-
-      dom.addEventListener('add-viewer', (e) => {
-        if (e.detail.path === undefined) {
-          e.detail.path = path;
-        }
-      });
-
-      dom.addEventListener('upload-text-file', (e) => {
-        if (e.detail.path === undefined) {
-          e.detail.path = [...path, e.detail.filename];
-        }
-      });
-
-      dom.addEventListener('exit', (e) => {
-        renderState.visualState = 'minimized';
-        m.redraw();
-        e.stopPropagation();
-      });
-
-      dom.addEventListener('permissions-selected', (e) => {
-        settingsSelected = settingsSelected === 'permissions' ? null : 'permissions';
-        renderState.settings.selected = renderState.settings.selected === 'permissions' ? null : 'permissions';
-        e.stopPropagation();
-      });
-
-      dom.addEventListener('tags-selected', (e) => {
-        renderState.settings.selected = renderState.settings.selected === 'tags' ? null : 'tags';
-        e.stopPropagation();
-      });
-
-      dom.addEventListener('choose-upload-files', (e) => {
-        
-        fileInput.click();
-        e.stopPropagation();
-      });
-
-      dom.addEventListener('choose-upload-folder', (e) => {
-        folderInput.click();
-        e.stopPropagation();
-      });
-    },
-
-    view: (vnode) => {
-
-      const dom = vnode.dom;
-      const data = vnode.attrs.data;
-      const remoAddr = vnode.attrs.remoAddr;
-      const path = vnode.attrs.path;
-      const renderState = vnode.attrs.state;
-
-      const type = data.type;
-      const name = path[path.length - 1];
-      const pathStr = path.join('/')
-      const url = encodeURI(remoAddr + '/' + pathStr);
-      const item = data;
-
-      let icon;
-      if (type === 'file') {
-        icon = 'i.fas.fa-file';
-      }
-      else {
-        icon = 'i.fas.fa-folder';
-      }
-
-      const headerClasses = '.item__header' + (renderState.visualState === 'expanded' ? '.item__header--expanded' : '');
-
-      return m('.item',
-        m(headerClasses,
-          { 
-            onclick: (e) => {
-              renderState.visualState = renderState.visualState === 'minimized' ? 'expanded' : 'minimized';
-            },
-          },
-          m('input.item__checkbox', 
-            {
-              type: 'checkbox',
-              onclick: (e) => {
-                e.stopPropagation();
-              },
-              onchange: (e) => {
-                vnode.dom.dispatchEvent(new CustomEvent('item-check-changed', {
-                  bubbles: true,
-                  detail: {
-                    path,
-                    checked: e.target.checked,
-                    item,
-                  },
-                }));
-              },
-            }),
-          m(icon),
-          m('span.item__name', name),
-          m('span.item__public-icon',
-            item.permissions && item.permissions.publicView ?
-            m('i.fas.fa-eye',
-              {
-                title: "Publicly visible",
-              }
-            )
-            :
-            null
-          ),
-        ),
-        renderState.visualState === 'expanded' ? m(ItemControlsMithril,
-          {
-            item,
-            url,
-            path,
-          }
-        )
-        :
-        null,
-        m('.item__settings',
-          m(ItemSettingsAdapter,
-            {
-              data,
-              renderState: renderState.settings,
-            },
-          ),
-        ),
-        m(PreviewMithril,
-          {
-            state: renderState.visualState,
-            path,
-            data,
-            remoAddr,
-          },
-        ),
-      );
-    },
-  };
-};
-
-const ItemControlsMithril = () => {
-  return {
-    onbeforeupdate: (vnode) => {
-      // mithril should ignore this component
-      return false;
-    },
-
-    oncreate: (vnode) => {
-      const itemControls = ItemControls(vnode.attrs.item, vnode.attrs.url, vnode.attrs.path);
-      vnode.dom.appendChild(itemControls);
-    },
-
-    view: (vnode) => {
-      return m('.item-controls-mithril');
-    }
-  };
-};
-
-const ItemContentMithril = () => {
-  return {
-    onbeforeupdate: (vnode) => {
-      // mithril should ignore this component
-      return false;
-    },
-
-    oncreate: (vnode) => {
-      vnode.dom.appendChild(ItemContent(vnode.attrs.path, vnode.attrs.data, vnode.attrs.remoAddr));
-    },
-
-    view: (vnode) => {
-      return m('.item-content-mithril');
-    }
-  };
-};
 
 const ItemContent = (path, data, remoAddr) => {
   const dom = document.createElement('div');
@@ -389,23 +317,6 @@ const ItemControls = (item, url, path) => {
 };
 
 
-const ItemSettingsAdapter = () => {
-  return {
-    onbeforeupdate: (vnode) => {
-      // mithril should ignore this component
-      return false;
-    },
-
-    oncreate: (vnode) => {
-      vnode.dom.appendChild(ItemSettings(vnode.attrs.data, vnode.attrs.renderState));
-    },
-
-    view: (vnode) => {
-      return m('.item-settings-adapter');
-    }
-  };
-};
-
 const InvisibleFileInput = (path) => {
   const fileInput = document.createElement('input');
   fileInput.classList.add('upload-button__input');
@@ -477,6 +388,5 @@ const NameInput = (onSubmit, onCancel) => {
 
 export {
   Item,
-  ItemMithrilAdapter,
-  ItemContentMithril,
+  ItemContent,
 };

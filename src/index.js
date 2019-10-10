@@ -3,8 +3,7 @@ import { decodeObject } from 'omnistreams';
 import {
   DeleteButton, UploadButton, UploadButtonNew, NewFolderButton
 } from './components/buttons.js';
-import { DirectoryAdapter } from './components/directory.js';
-import { ItemContentMithril } from './components/item.js';
+import { ItemContent } from './components/item.js';
 import m from 'mithril';
 import rein from 'rein-state';
 
@@ -219,7 +218,6 @@ const Home = () => {
           ),
           m('.main__directory',
             m(ItemContentMithril,
-            //m(DirectoryAdapter,
               {
                 path: [],
                 //data: reinstate.root.children,
@@ -234,6 +232,22 @@ const Home = () => {
   };
 };
 
+const ItemContentMithril = () => {
+  return {
+    onbeforeupdate: (vnode) => {
+      // mithril should ignore this component
+      return false;
+    },
+
+    oncreate: (vnode) => {
+      vnode.dom.appendChild(ItemContent(vnode.attrs.path, vnode.attrs.data, vnode.attrs.remoAddr));
+    },
+
+    view: (vnode) => {
+      return m('.item-content-mithril');
+    }
+  };
+};
 
 const ControlBarMithril = (checkedItems) => {
 

@@ -1,7 +1,7 @@
 import m from 'mithril';
 import h from 'hyperscript';
 import rein from 'rein-state';
-import { ItemMithrilAdapter } from './item.js';
+import { Item } from './item.js';
 
 
 const DirectoryAdapter = () => {
@@ -49,12 +49,14 @@ function makeItemState() {
 
 function newItem(path, data, item, remoAddr) {
   const wrapper = h('.directory__items__item');
-  const itemElem = ItemMithrilAdapter(path.concat([item.name]), data[item.name], item.state, remoAddr);
+  const itemElem = Item(path.concat([item.name]), data[item.name], item.state, remoAddr);
   wrapper.appendChild(itemElem);
 
+  // TODO: is this working for nested updates? ie if an elem is added here
+  // does it work as well?
   rein.onUpdated(data, item.name, () => {
     const oldElem = wrapper.childNodes[0];
-    const newElem = ItemMithrilAdapter(path.concat([item.name]), data[item.name], item.state, remoAddr);
+    const newElem = Item(path.concat([item.name]), data[item.name], item.state, remoAddr);
     wrapper.replaceChild(newElem, oldElem);
   });
 
