@@ -1,4 +1,3 @@
-import m from 'mithril';
 import { TextButton } from './buttons';
 
 
@@ -85,24 +84,6 @@ const TextEditor = (options) => {
 };
 
 
-const TextFileEditorMithril = () => {
-  return {
-    onbeforeupdate: (vnode) => {
-      // mithril should ignore this component
-      return false;
-    },
-
-    oncreate: (vnode) => {
-      vnode.dom.appendChild(TextFileEditor(vnode.attrs.options));
-    },
-
-    view: (vnode) => {
-      return m('.text-file-editor-mithril');
-    }
-  };
-};
-
 export {
   TextFileEditor,
-  TextFileEditorMithril,
 };

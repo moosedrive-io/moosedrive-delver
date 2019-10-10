@@ -1,6 +1,3 @@
-import m from 'mithril';
-
-
 const TextButton = (text) => {
   const button = document.createElement('button');
   button.classList.add('text-button');
