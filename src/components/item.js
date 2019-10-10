@@ -40,7 +40,11 @@ const Item = () => {
 
     oncreate: (vnode) => {
 
-      const renderState = vnode.attrs.state;
+      const dom = vnode.dom;
+      const state = vnode.attrs.state;
+      const path = vnode.attrs.path;
+
+      const renderState = state;
 
       const uppie = new Uppie();
 
@@ -51,7 +55,7 @@ const Item = () => {
           const filenameParts = file.name.split('/');
           const dir = [...path, ...filenameParts.slice(0, -1)];
           const filename = filenameParts[filenameParts.length - 1];
-          vnode.dom.dispatchEvent(new CustomEvent('upload-file', {
+          dom.dispatchEvent(new CustomEvent('upload-file', {
             bubbles: true,
             detail: {
               path,
@@ -63,56 +67,56 @@ const Item = () => {
 
       const fileInput = InvisibleFileInput(path);
       uppie(fileInput, handleFiles);
-      vnode.dom.appendChild(fileInput);
+      dom.appendChild(fileInput);
       
       const folderInput = InvisibleFolderInput(path);
       uppie(folderInput, handleFiles);
-      vnode.dom.appendChild(folderInput);
+      dom.appendChild(folderInput);
 
 
-      vnode.dom.addEventListener('set-public-view', (e) => {
+      dom.addEventListener('set-public-view', (e) => {
         // modify the event in place
         if (e.detail.path === undefined) {
           e.detail.path = path;
         }
       });
 
-      vnode.dom.addEventListener('add-viewer', (e) => {
+      dom.addEventListener('add-viewer', (e) => {
         if (e.detail.path === undefined) {
           e.detail.path = path;
         }
       });
 
-      vnode.dom.addEventListener('upload-text-file', (e) => {
+      dom.addEventListener('upload-text-file', (e) => {
         if (e.detail.path === undefined) {
           e.detail.path = [...path, e.detail.filename];
         }
       });
 
-      vnode.dom.addEventListener('exit', (e) => {
+      dom.addEventListener('exit', (e) => {
         renderState.visualState = 'minimized';
         m.redraw();
         e.stopPropagation();
       });
 
-      vnode.dom.addEventListener('permissions-selected', (e) => {
+      dom.addEventListener('permissions-selected', (e) => {
         settingsSelected = settingsSelected === 'permissions' ? null : 'permissions';
         renderState.settings.selected = renderState.settings.selected === 'permissions' ? null : 'permissions';
         e.stopPropagation();
       });
 
-      vnode.dom.addEventListener('tags-selected', (e) => {
+      dom.addEventListener('tags-selected', (e) => {
         renderState.settings.selected = renderState.settings.selected === 'tags' ? null : 'tags';
         e.stopPropagation();
       });
 
-      vnode.dom.addEventListener('choose-upload-files', (e) => {
+      dom.addEventListener('choose-upload-files', (e) => {
         
         fileInput.click();
         e.stopPropagation();
       });
 
-      vnode.dom.addEventListener('choose-upload-folder', (e) => {
+      dom.addEventListener('choose-upload-folder', (e) => {
         folderInput.click();
         e.stopPropagation();
       });
@@ -120,14 +124,17 @@ const Item = () => {
 
     view: (vnode) => {
 
-      const type = vnode.attrs.data.type;
-      path = vnode.attrs.path;
+      const dom = vnode.dom;
+      const data = vnode.attrs.data;
+      const remoAddr = vnode.attrs.remoAddr;
+      const path = vnode.attrs.path;
+      const renderState = vnode.attrs.state;
+
+      const type = data.type;
       const name = path[path.length - 1];
       const pathStr = path.join('/')
-      const url = encodeURI(vnode.attrs.remoAddr + '/' + pathStr);
-      const item = vnode.attrs.data;
-
-      const renderState = vnode.attrs.state;
+      const url = encodeURI(remoAddr + '/' + pathStr);
+      const item = data;
 
       let icon;
       if (type === 'file') {
@@ -180,7 +187,7 @@ const Item = () => {
           {
             item,
             url,
-            path: vnode.attrs.path,
+            path,
           }
         )
         :
@@ -188,7 +195,7 @@ const Item = () => {
         m('.item__settings',
           m(ItemSettingsAdapter,
             {
-              data: vnode.attrs.data,
+              data,
               renderState: renderState.settings,
             },
           ),
@@ -196,9 +203,9 @@ const Item = () => {
         m(PreviewMithril,
           {
             state: renderState.visualState,
-            path: vnode.attrs.path,
-            data: vnode.attrs.data,
-            remoAddr: vnode.attrs.remoAddr,
+            path,
+            data,
+            remoAddr,
           },
         ),
       );
