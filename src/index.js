@@ -3,7 +3,8 @@ import { decodeObject } from 'omnistreams';
 import {
   DeleteButton, UploadButton, UploadButtonNew, NewFolderButton
 } from './components/buttons.js';
-import { DirectoryAdapter, ItemContentMithril } from './components/directory.js';
+import { DirectoryAdapter } from './components/directory.js';
+import { ItemContentMithril } from './components/item.js';
 import m from 'mithril';
 import rein from 'rein-state';
 
