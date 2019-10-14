@@ -114,7 +114,7 @@ const Home = () => {
           .secure(secure)
           .build();
 
-        const manfs = new EventSource('/manfs?subscribe=true');
+        const manfs = new EventSource('/manfs.json?events=true');
 
         manfs.addEventListener('message', (e) => {
           const message = JSON.parse(e.data);
