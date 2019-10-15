@@ -1,5 +1,3 @@
-import { ClientBuilder } from 'moosedrive-api-client';
-import { decodeObject } from 'omnistreams';
 import {
   DeleteButton, UploadButton, UploadButtonNew, NewFolderButton
 } from './components/buttons.js';
@@ -80,6 +78,22 @@ function handleManfsUpdate(message) {
   m.redraw();
 }
 
+
+function get(pathStr) {
+  const path = parsePath(pathStr);
+
+  let curPath = reinstate.root;
+
+  while (path.length > 0) {
+    const part = path[0];
+
+    curPath = curPath.children[part];
+    path.shift();
+  }
+
+  return curPath;
+}
+
 const Home = () => {
 
   const appState = rein.fromObject({
@@ -108,11 +122,6 @@ const Home = () => {
       }
 
       (async () => {
-        State.client = await new ClientBuilder()
-          .authKey(key)
-          .port(port)
-          .secure(secure)
-          .build();
 
         const manfs = new EventSource('/manfs.json?events=true');
 
@@ -138,13 +147,27 @@ const Home = () => {
 
     oncreate: (vnode) => {
 
-      vnode.dom.addEventListener('set-public-view', (e) => {
-        State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
+      vnode.dom.addEventListener('set-public-view', async (e) => {
+        // TODO: re-implement setting recursively
+
+        const pathStr = buildPathStr(e.detail.path);
+
+        await fetch(pathStr + "/manfs.json", {
+          method: 'PUT',
+          body: JSON.stringify({
+            permissions: {
+              publicView: e.detail.value,
+            },
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
       });
 
       vnode.dom.addEventListener('add-viewer', (e) => {
-        State.client.addViewer(buildPathStr(e.detail.path), e.detail.viewerId);
-        //State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
+        // TODO: implement in manfs
+        //State.client.addViewer(buildPathStr(e.detail.path), e.detail.viewerId);
       });
 
       vnode.dom.addEventListener('upload-file', async (e) => {
