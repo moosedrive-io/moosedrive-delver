@@ -147,28 +147,22 @@ const Home = () => {
         //State.client.setPublicView(buildPathStr(e.detail.path), e.detail.value, e.detail.recursive);
       });
 
-      vnode.dom.addEventListener('delete-item', async (e) => {
-
-        const path = '/' + e.detail.path.join('/');
-
-        try {
-          const result = await State.client.delete(path);
-        }
-        catch (e) {
-          console.error("Failed to delete:", path, e);
-        }
-      });
-
-      vnode.dom.addEventListener('upload-file', (e) => {
+      vnode.dom.addEventListener('upload-file', async (e) => {
         const path = [...e.detail.path, e.detail.file.name];
         const pathStr = encodePath(path);
-        State.client.uploadFile(pathStr, e.detail.file);
+        await fetch(pathStr, {
+          method: 'PUT',
+          body: e.detail.file,
+        });
       });
 
-      vnode.dom.addEventListener('upload-text-file', (e) => {
+      vnode.dom.addEventListener('upload-text-file', async (e) => {
         const path = e.detail.path;
         const pathStr = encodePath(path);
-        State.client.storeTextFile(pathStr, e.detail.text);
+        await fetch(pathStr, {
+          method: 'PUT',
+          body: e.detail.text,
+        });
       });
 
       vnode.dom.addEventListener('item-check-changed', (e) => {
@@ -191,15 +185,19 @@ const Home = () => {
 
         const paths = Object.keys(checkedItems);
 
-        paths.forEach((path) => {
-          State.client.delete(path);
+        paths.forEach(async (path) => {
+          await fetch(path, {
+            method: 'DELETE',
+          });
         });
 
         checkedItems = {};
       });
 
       vnode.dom.addEventListener('create-folder', async (e) => {
-        const result = await State.client.createFolder(encodePath(e.detail.path));
+        await fetch(encodePath(e.detail.path) + "?dir=true", {
+          method: 'PUT',
+        });
       });
 
     },
