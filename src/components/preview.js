@@ -82,6 +82,15 @@ const PreviewMithril = () => {
                 }
               );
             }
+            else if (mime && mime.startsWith('video')) {
+              previewContent = m('video.item__preview__video',
+                {
+                  src: url,
+                  type: mime,
+                  controls: true,
+                }
+              );
+            }
             // default to assuming text
             else {
               previewContent = m('.item__preview__text',

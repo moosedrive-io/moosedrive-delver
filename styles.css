@@ -212,6 +212,13 @@
   max-height: var(--preview-height);
 }
 
+.item__preview__video {
+  max-width: 100%; 
+  max-height: var(--preview-height);
+  display: block;
+  margin: 0 auto;
+}
+
 .markdown-preview-mithril {
   max-height: var(--preview-height);
   overflow: scroll;
