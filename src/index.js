@@ -3,7 +3,7 @@ import {
 } from './components/buttons.js';
 import { ItemContent } from './components/item.js';
 import m from 'mithril';
-import rein from 'rein-state';
+import rein from '@anderspitman/reinstate';
 
 
 const ITEM_TYPE_DIR = 'dir';

@@ -1,6 +1,6 @@
 import m from 'mithril';
 import h from 'hyperscript';
-import rein from 'rein-state';
+import rein from '@anderspitman/reinstate';
 import { Item } from './item.js';
 
 

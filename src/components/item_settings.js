@@ -1,4 +1,4 @@
-import rein from 'rein-state';
+import rein from '@anderspitman/reinstate';
 import h from 'hyperscript';
 
 
