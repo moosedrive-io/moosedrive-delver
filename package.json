@@ -12,7 +12,7 @@
   "dependencies": {
     "@anderspitman/reinstate": "^0.1.0",
     "hyperscript": "^2.0.2",
-    "marked": "^0.7.0",
+    "marked": "^4.0.10",
     "mime": "^2.4.4",
     "mithril": "^2.0.0-rc.6",
     "normalize.css": "^8.0.1",
